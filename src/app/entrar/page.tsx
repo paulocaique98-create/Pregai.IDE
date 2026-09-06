@@ -2,6 +2,15 @@
 
 import { useActionState, useState } from "react";
 import { signIn, signUp } from "./actions";
+import { createClient } from "@/lib/supabase/client";
+
+async function googleSignIn() {
+  const supabase = createClient();
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${window.location.origin}/auth/callback` },
+  });
+}
 
 export default function EntrarPage() {
   const [mode, setMode] = useState<"in" | "up">("in");
@@ -16,7 +25,19 @@ export default function EntrarPage() {
           {mode === "in" ? "Entre na sua conta" : "Crie sua conta"}
         </p>
 
-        <form action={formAction} className="mt-6 space-y-3">
+        <button
+          onClick={googleSignIn}
+          type="button"
+          className="mt-6 w-full rounded-[var(--radius)] border border-border bg-card px-3 py-2 text-sm font-medium"
+        >
+          Continuar com Google
+        </button>
+
+        <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <form action={formAction} className="space-y-3">
           {mode === "up" && (
             <input
               name="full_name"
