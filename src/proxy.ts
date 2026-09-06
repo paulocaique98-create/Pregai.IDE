@@ -4,6 +4,17 @@ import { NextResponse, type NextRequest } from "next/server";
 // Refreshes the Supabase session on every request. Tenant subdomain routing
 // will be added here in Phase 1 (rewrite <slug>.<base-domain> -> /igreja/<slug>).
 export async function proxy(request: NextRequest) {
+  // OAuth: se o Supabase devolver ?code= numa rota que não é o handler
+  // (acontece quando o Site URL dele aponta para outro lugar), redireciona.
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && request.nextUrl.pathname !== "/auth/callback") {
+    const to = request.nextUrl.clone();
+    const next = to.searchParams.get("next");
+    to.pathname = "/auth/callback";
+    to.search = `?code=${code}${next ? `&next=${encodeURIComponent(next)}` : ""}`;
+    return NextResponse.redirect(to);
+  }
+
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
