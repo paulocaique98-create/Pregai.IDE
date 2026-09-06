@@ -200,10 +200,17 @@ export default async function IgrejaPublicPage({
         </Section>
       )}
 
-      <footer className="px-6 py-10 text-center text-sm text-muted-foreground">
-        {org.name}
-        {site.contact?.address ? ` · ${site.contact.address}` : ""}
-        {site.contact?.whatsapp ? ` · ${site.contact.whatsapp}` : ""}
+      <footer className="space-y-2 px-6 py-10 text-center text-sm text-muted-foreground">
+        <p>
+          {org.name}
+          {site.contact?.address ? ` · ${site.contact.address}` : ""}
+          {site.contact?.whatsapp ? ` · ${site.contact.whatsapp}` : ""}
+        </p>
+        <p>
+          <a href={`/igreja/${slug}/entrar`} className="underline">
+            Área do membro
+          </a>
+        </p>
       </footer>
     </main>
   );

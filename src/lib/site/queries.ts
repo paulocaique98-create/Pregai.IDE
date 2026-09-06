@@ -16,6 +16,8 @@ export async function getOrgForMember(slug: string) {
     .select("role")
     .eq("org_id", org.id)
     .eq("user_id", user.id)
+    .eq("status", "active")
+    .in("role", ["owner", "pastor", "secretaria", "lider"])
     .maybeSingle();
   if (!membership) return null;
 
