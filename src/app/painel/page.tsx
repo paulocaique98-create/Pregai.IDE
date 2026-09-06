@@ -25,14 +25,16 @@ export default async function PainelPage() {
             subscription_status: string;
           };
           return (
-            <li
-              key={org.id}
-              className="rounded-[var(--radius)] border border-border bg-card p-4"
-            >
-              <p className="font-medium">{org.name}</p>
-              <p className="text-sm text-muted-foreground">
-                /igreja/{org.slug} · {m.role} · {org.subscription_status}
-              </p>
+            <li key={org.id}>
+              <a
+                href={`/painel/igreja/${org.slug}`}
+                className="block rounded-[var(--radius)] border border-border bg-card p-4 hover:border-foreground"
+              >
+                <p className="font-medium">{org.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  /igreja/{org.slug} · {m.role} · {org.subscription_status}
+                </p>
+              </a>
             </li>
           );
         })}
