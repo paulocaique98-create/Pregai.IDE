@@ -8,6 +8,8 @@ export function NavTabs({ slug }: { slug: string }) {
   const base = `/painel/igreja/${slug}`;
   const tabs = [
     { href: base, label: "Site" },
+    { href: `${base}/ministerios`, label: "Ministérios" },
+    { href: `${base}/agenda`, label: "Agenda" },
     { href: `${base}/oracoes`, label: "Oração" },
     { href: `${base}/membros`, label: "Membros" },
   ];

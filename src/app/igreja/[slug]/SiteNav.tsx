@@ -2,11 +2,11 @@ import Link from "next/link";
 import type { SectionKey } from "@/lib/site/schema";
 
 const NAV: Partial<Record<SectionKey, { label: string; anchor: string }>> = {
+  media: { label: "Última live", anchor: "#midia" },
   firstTime: { label: "Primeira vez", anchor: "#primeira-vez" },
   schedule: { label: "Horários", anchor: "#horarios" },
   about: { label: "Quem somos", anchor: "#quem-somos" },
   ministries: { label: "Ministérios", anchor: "#ministerios" },
-  media: { label: "Mídia", anchor: "#midia" },
   events: { label: "Agenda", anchor: "#eventos" },
   prayer: { label: "Oração", anchor: "#oracao" },
   contact: { label: "Contato", anchor: "#contato" },

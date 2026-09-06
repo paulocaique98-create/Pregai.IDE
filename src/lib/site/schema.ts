@@ -12,11 +12,11 @@ export type SectionKey =
 
 export const SECTION_ORDER: SectionKey[] = [
   "hero",
+  "media",
   "firstTime",
   "schedule",
   "about",
   "ministries",
-  "media",
   "events",
   "prayer",
   "contact",
