@@ -1,12 +1,13 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export async function requireUser() {
+export const requireUser = cache(async () => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/entrar");
   return { user: data.user, supabase };
-}
+});
 
 export type Membership = {
   role: string;
@@ -22,7 +23,7 @@ export type Membership = {
 
 const STAFF_ROLES = ["owner", "pastor", "secretaria", "lider"];
 
-export async function getMemberships() {
+export const getMemberships = cache(async () => {
   const { supabase, user } = await requireUser();
   const { data } = await supabase
     .from("organization_members")
@@ -36,4 +37,4 @@ export async function getMemberships() {
     admin: all.filter((m) => m.status === "active" && STAFF_ROLES.includes(m.role)),
     memberOf: all.filter((m) => m.role === "membro"),
   };
-}
+});

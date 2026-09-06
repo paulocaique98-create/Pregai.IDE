@@ -7,14 +7,16 @@ import { Sym } from "@/components/ui/primitives";
 
 const STAFF_NAV = [
   { seg: "", label: "Site", icon: "home", exact: true },
-  { seg: "ministerios", label: "Ministérios", icon: "diversity_3" },
+  { seg: "departamentos", label: "Deptos", icon: "workspaces" },
   { seg: "agenda", label: "Agenda", icon: "calendar_month" },
-  { seg: "departamentos", label: "Departamentos", icon: "workspaces" },
   { seg: "oracoes", label: "Oração", icon: "volunteer_activism" },
   { seg: "membros", label: "Membros", icon: "group" },
 ];
+const STAFF_MORE = [
+  { seg: "ministerios", label: "Ministérios (site)", icon: "diversity_3" },
+];
 const LEADER_NAV = [
-  { seg: "departamentos", label: "Meus departamentos", icon: "workspaces", exact: false },
+  { seg: "departamentos", label: "Meus departamentos", icon: "workspaces" },
 ];
 
 export function Shell({
@@ -37,34 +39,35 @@ export function Shell({
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const base = `/painel/igreja/${slug}`;
-  const NAV = isStaff ? STAFF_NAV : LEADER_NAV;
-  const active = (n: (typeof NAV)[number]) => {
-    const href = n.seg ? `${base}/${n.seg}` : base;
-    return n.exact ? path === href : path.startsWith(href);
-  };
+  const primary = isStaff ? STAFF_NAV : LEADER_NAV;
+  const all = isStaff ? [...STAFF_NAV, ...STAFF_MORE] : LEADER_NAV;
 
-  const nav = (
-    <nav className="flex flex-col gap-0.5">
-      {NAV.map((n) => {
-        const href = n.seg ? `${base}/${n.seg}` : base;
-        return (
-          <Link
-            key={n.label}
-            href={href}
-            onClick={() => setOpen(false)}
-            className={`flex items-center gap-3 rounded-[var(--radius)] px-3 py-2 text-sm transition-colors ${
-              active(n)
-                ? "bg-primary font-medium text-primary-foreground"
-                : "text-muted-foreground hover:bg-surface hover:text-foreground"
-            }`}
-          >
-            <Sym name={n.icon} className="text-[20px]" />
-            {n.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  const href = (seg: string) => (seg ? `${base}/${seg}` : base);
+
+  const linkRow = (
+    seg: string,
+    label: string,
+    icon: string,
+    exact: boolean | undefined,
+    onClick?: () => void,
+  ) => {
+    const active = exact ? path === href(seg) : seg && path.startsWith(href(seg));
+    return (
+      <Link
+        key={seg || "home"}
+        href={href(seg)}
+        onClick={onClick}
+        className={`flex items-center gap-3 rounded-[var(--radius)] px-3 py-2.5 text-sm transition-colors ${
+          active
+            ? "bg-primary font-medium text-primary-foreground"
+            : "text-muted-foreground hover:bg-surface hover:text-foreground"
+        }`}
+      >
+        <Sym name={icon} className="text-[20px]" />
+        {label}
+      </Link>
+    );
+  };
 
   return (
     <div className="min-h-full md:pl-60">
@@ -85,13 +88,17 @@ export function Shell({
               <Sym name="chevron_left" className="text-[16px]" /> Todas as igrejas
             </Link>
             <p className="px-3 text-sm font-medium leading-tight">{orgName}</p>
-            <div className="mt-1 flex items-center gap-1.5 px-3 text-xs text-muted-foreground">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${published ? "bg-accent" : "bg-muted-foreground/50"}`}
-              />
-              {published ? "publicado" : "rascunho"}
+            {isStaff && (
+              <div className="mt-1 flex items-center gap-1.5 px-3 text-xs text-muted-foreground">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${published ? "bg-accent" : "bg-muted-foreground/50"}`}
+                />
+                {published ? "publicado" : "rascunho"}
+              </div>
+            )}
+            <div className="mt-4 flex flex-col gap-0.5">
+              {all.map((n) => linkRow(n.seg, n.label, n.icon, (n as { exact?: boolean }).exact))}
             </div>
-            <div className="mt-4">{nav}</div>
           </div>
         </div>
         <div className="border-t border-border p-3">
@@ -112,32 +119,30 @@ export function Shell({
       </aside>
 
       {/* Topbar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur md:px-8">
-        <button
-          onClick={() => setOpen(true)}
-          className="md:hidden"
-          aria-label="Menu"
-        >
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur md:px-8">
+        <button onClick={() => setOpen(true)} className="md:hidden" aria-label="Menu">
           <Sym name="menu" className="text-[24px]" />
         </button>
+        <span className="truncate font-[family-name:var(--font-display)] text-base font-semibold tracking-tight md:hidden">
+          {orgName}
+        </span>
+        <div className="flex-1" />
         <Link
           href={`/igreja/${slug}`}
           target="_blank"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
-          <Sym name="open_in_new" className="text-[16px]" />
-          <span className="hidden sm:inline">Ver site público</span>
+          <Sym name="open_in_new" className="text-[18px]" />
+          <span className="hidden sm:inline">Ver site</span>
         </Link>
-        <div className="flex-1" />
-        <span className="hidden text-xs text-muted-foreground sm:block">{orgName}</span>
       </header>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer (secundário) */}
       {open && (
         <div className="fixed inset-0 z-50 md:hidden" onClick={() => setOpen(false)}>
           <div className="absolute inset-0 bg-black/40" />
           <div
-            className="absolute inset-y-0 left-0 w-72 bg-background p-4 shadow-xl"
+            className="absolute inset-y-0 left-0 flex w-72 flex-col bg-background p-4 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
@@ -155,15 +160,51 @@ export function Shell({
             >
               <Sym name="chevron_left" className="text-[16px]" /> Todas as igrejas
             </Link>
-            {nav}
-            <form action={signOut} className="mt-6">
+            <div className="flex flex-col gap-0.5">
+              {all.map((n) =>
+                linkRow(n.seg, n.label, n.icon, (n as { exact?: boolean }).exact, () =>
+                  setOpen(false),
+                ),
+              )}
+            </div>
+            <form action={signOut} className="mt-auto pt-6">
               <button className="btn btn-outline w-full">Sair</button>
             </form>
           </div>
         </div>
       )}
 
-      <div className="mx-auto max-w-5xl px-4 py-8 md:px-8">{children}</div>
+      <div className="mx-auto max-w-5xl px-3 pb-24 pt-6 sm:px-4 md:px-8 md:pb-10">
+        {children}
+      </div>
+
+      {/* Bottom nav (mobile) */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 grid border-t border-border bg-background/95 backdrop-blur md:hidden"
+        style={{
+          gridTemplateColumns: `repeat(${primary.length}, minmax(0, 1fr))`,
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
+        {primary.map((n) => {
+          const active =
+            (n as { exact?: boolean }).exact
+              ? path === href(n.seg)
+              : n.seg && path.startsWith(href(n.seg));
+          return (
+            <Link
+              key={n.seg || "home"}
+              href={href(n.seg)}
+              className={`flex flex-col items-center gap-0.5 py-2 text-[0.65rem] ${
+                active ? "text-foreground" : "text-muted-foreground"
+              }`}
+            >
+              <Sym name={n.icon} className="text-[22px]" />
+              {n.label}
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

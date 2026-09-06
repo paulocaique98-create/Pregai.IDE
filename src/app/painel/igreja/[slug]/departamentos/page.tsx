@@ -12,30 +12,28 @@ export default async function DepartamentosPage({
   if (!ctx) notFound();
 
   // RLS entrega: staff vê todos; líder vê os da org mas só gerencia os seus.
-  const { data: depts } = await ctx.supabase
-    .from("departments")
-    .select("id, name, description, is_active, allow_join_requests")
-    .eq("org_id", ctx.org.id)
-    .order("name");
+  const [{ data: depts }, { data: dm }] = await Promise.all([
+    ctx.supabase
+      .from("departments")
+      .select("id, name, description, is_active, allow_join_requests")
+      .eq("org_id", ctx.org.id)
+      .order("name"),
+    ctx.supabase
+      .from("department_members")
+      .select("department_id, user_id, role, status")
+      .eq("org_id", ctx.org.id),
+  ]);
 
-  const { data: myLead } = await ctx.supabase
-    .from("department_members")
-    .select("department_id, role, status")
-    .eq("org_id", ctx.org.id)
-    .eq("user_id", ctx.user.id);
   const leadSet = new Set(
-    (myLead ?? [])
-      .filter((m) => m.role === "leader" && m.status === "active")
+    (dm ?? [])
+      .filter(
+        (m) =>
+          m.user_id === ctx.user.id && m.role === "leader" && m.status === "active",
+      )
       .map((m) => m.department_id),
   );
-
-  // contagem de membros por departamento
-  const { data: counts } = await ctx.supabase
-    .from("department_members")
-    .select("department_id, status")
-    .eq("org_id", ctx.org.id);
   const countFor = (id: string, status?: string) =>
-    (counts ?? []).filter(
+    (dm ?? []).filter(
       (c) => c.department_id === id && (!status || c.status === status),
     ).length;
 
