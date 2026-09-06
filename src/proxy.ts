@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Refreshes the Supabase session on every request. Tenant subdomain routing
 // will be added here in Phase 1 (rewrite <slug>.<base-domain> -> /igreja/<slug>).
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
