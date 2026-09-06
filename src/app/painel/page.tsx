@@ -1,87 +1,109 @@
 import Link from "next/link";
 import { getMemberships } from "@/lib/auth";
 import { signOut } from "@/app/entrar/actions";
+import { Kicker, Badge, Sym } from "@/components/ui/primitives";
 
 export default async function PainelPage() {
   const { admin, memberOf } = await getMemberships();
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl">Painel</h1>
-        <form action={signOut}>
-          <button className="text-sm text-muted-foreground underline">Sair</button>
-        </form>
-      </div>
-
-      {admin.length === 0 && memberOf.length === 0 && (
-        <div className="mt-8 rounded-[var(--radius)] border border-border bg-card p-6">
-          <p className="font-medium">Você ainda não administra nenhuma igreja.</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Se você é membro, acesse pelo site da sua igreja. Se você lidera uma
-            igreja, cadastre-a aqui.
-          </p>
-          <Link
-            href="/onboarding"
-            className="mt-4 inline-block rounded-[var(--radius)] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-          >
-            Cadastrar minha igreja
-          </Link>
+    <div className="min-h-full">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+          <span className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold tracking-tight">
+            <Sym name="church" className="text-[22px]" /> Pregai
+          </span>
+          <form action={signOut}>
+            <button className="btn btn-ghost">Sair</button>
+          </form>
         </div>
-      )}
+      </header>
 
-      {admin.length > 0 && (
-        <>
-          <h2 className="mt-8 text-sm font-medium text-muted-foreground">
-            Igrejas que você administra
-          </h2>
-          <ul className="mt-2 space-y-2">
-            {admin.map((m) => (
-              <li key={m.organizations.id}>
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        {admin.length === 0 && memberOf.length === 0 && (
+          <div className="card p-8 text-center">
+            <Sym name="add_home_work" className="text-[32px] text-muted-foreground" />
+            <p className="mt-2 font-medium">Você ainda não administra nenhuma igreja.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Se você é membro, acesse pelo site da sua igreja. Se você lidera
+              uma, cadastre-a aqui.
+            </p>
+            <Link href="/onboarding" className="btn btn-primary mt-5">
+              Cadastrar minha igreja
+            </Link>
+          </div>
+        )}
+
+        {admin.length > 0 && (
+          <section>
+            <Kicker>Administração</Kicker>
+            <h1 className="mb-4 mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight">
+              Suas igrejas
+            </h1>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {admin.map((m) => (
                 <Link
+                  key={m.organizations.id}
                   href={`/painel/igreja/${m.organizations.slug}`}
-                  className="block rounded-[var(--radius)] border border-border bg-card p-4 hover:border-foreground"
+                  className="card group p-5 transition-colors hover:border-border-strong"
                 >
-                  <p className="font-medium">{m.organizations.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    /igreja/{m.organizations.slug} · {m.role} ·{" "}
-                    {m.organizations.subscription_status}
+                  <div className="flex items-start justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-[var(--radius)] bg-primary text-primary-foreground">
+                      <Sym name="church" className="text-[20px]" />
+                    </span>
+                    <Sym
+                      name="arrow_outward"
+                      className="text-[18px] text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                    />
+                  </div>
+                  <p className="mt-3 font-medium">{m.organizations.name}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    /igreja/{m.organizations.slug}
                   </p>
+                  <div className="mt-3">
+                    <Badge tone="outline">{m.role}</Badge>{" "}
+                    <Badge>{m.organizations.subscription_status}</Badge>
+                  </div>
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+              ))}
+            </div>
+          </section>
+        )}
 
-      {memberOf.length > 0 && (
-        <>
-          <h2 className="mt-8 text-sm font-medium text-muted-foreground">
-            Você é membro de
-          </h2>
-          <ul className="mt-2 space-y-2">
-            {memberOf.map((m) => (
-              <li
-                key={m.organizations.id}
-                className="rounded-[var(--radius)] border border-border bg-card p-4"
-              >
-                <p className="font-medium">{m.organizations.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {m.status === "active"
-                    ? "membro ativo"
-                    : m.status === "pending"
-                      ? "cadastro aguardando aprovação"
-                      : "acesso bloqueado"}
-                  {" · "}
-                  <Link href={`/igreja/${m.organizations.slug}/membro`} className="underline">
-                    abrir área do membro
+        {memberOf.length > 0 && (
+          <section className="mt-10">
+            <Kicker>Sou membro</Kicker>
+            <h2 className="mb-4 mt-1 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight">
+              Igrejas que participo
+            </h2>
+            <ul className="space-y-2">
+              {memberOf.map((m) => (
+                <li key={m.organizations.id} className="card flex items-center gap-3 p-4">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                    <Sym name="person" className="text-[18px]" />
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{m.organizations.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {m.status === "active"
+                        ? "membro ativo"
+                        : m.status === "pending"
+                          ? "aguardando aprovação"
+                          : "acesso bloqueado"}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/igreja/${m.organizations.slug}/membro`}
+                    className="btn btn-outline !px-3 !py-1.5 text-xs"
+                  >
+                    Abrir
                   </Link>
-                </p>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </main>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </main>
+    </div>
   );
 }

@@ -1,41 +1,69 @@
 @import "tailwindcss";
 
-/* Design system: preto e branco, minimalista. Tokens HSL trocaveis por tenant. */
+/* Design system: sóbrio, monocromático, minimalista.
+   Baseado no Stitch "Sober Minimalist Church Management". */
 :root {
   --background: 0 0% 100%;
-  --foreground: 0 0% 8%;
-  --muted: 0 0% 96%;
+  --foreground: 0 0% 7%;
+  --surface: 0 0% 96.5%;
+  --muted: 0 0% 96.5%;
   --muted-foreground: 0 0% 45%;
-  --card: 0 0% 98%;
-  --border: 0 0% 90%;
-  --primary: 0 0% 8%;
+  --card: 0 0% 100%;
+  --card-hover: 0 0% 98%;
+  --border: 0 0% 89%;
+  --border-strong: 0 0% 16%;
+  --primary: 0 0% 7%;
   --primary-foreground: 0 0% 100%;
-  --accent: 38 45% 55%;
-  --radius: 0.375rem;
+  --accent: 38 42% 52%;
+  --danger: 0 74% 42%;
+  --radius: 0.25rem;
+  --radius-lg: 0.5rem;
 }
 
-.dark,
 :root[data-theme="dark"] {
   --background: 0 0% 4%;
   --foreground: 0 0% 96%;
+  --surface: 0 0% 8%;
   --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 62%;
-  --card: 0 0% 8%;
-  --border: 0 0% 16%;
+  --muted-foreground: 0 0% 60%;
+  --card: 0 0% 6%;
+  --card-hover: 0 0% 9%;
+  --border: 0 0% 15%;
+  --border-strong: 0 0% 40%;
   --primary: 0 0% 96%;
-  --primary-foreground: 0 0% 4%;
+  --primary-foreground: 0 0% 5%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 96%;
+    --surface: 0 0% 8%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+    --card: 0 0% 6%;
+    --card-hover: 0 0% 9%;
+    --border: 0 0% 15%;
+    --border-strong: 0 0% 40%;
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 5%;
+  }
 }
 
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+  --color-surface: hsl(var(--surface));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-card: hsl(var(--card));
+  --color-card-hover: hsl(var(--card-hover));
   --color-border: hsl(var(--border));
+  --color-border-strong: hsl(var(--border-strong));
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-accent: hsl(var(--accent));
+  --color-danger: hsl(var(--danger));
   --radius: var(--radius);
 }
 
@@ -47,4 +75,87 @@ body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Primitivos reutilizáveis */
+.field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.375rem;
+}
+.field-input {
+  width: 100%;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  transition: border-color 0.15s;
+}
+.field-input:focus {
+  outline: none;
+  border-color: hsl(var(--border-strong));
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+.btn-primary:hover {
+  opacity: 0.88;
+}
+.btn-outline {
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  background: transparent;
+}
+.btn-outline:hover {
+  background: hsl(var(--surface));
+  border-color: hsl(var(--border-strong));
+}
+.btn-ghost {
+  color: hsl(var(--muted-foreground));
+  background: transparent;
+}
+.btn-ghost:hover {
+  background: hsl(var(--surface));
+  color: hsl(var(--foreground));
+}
+.card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
 }

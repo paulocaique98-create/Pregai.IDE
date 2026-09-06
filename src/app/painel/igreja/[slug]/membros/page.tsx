@@ -1,5 +1,13 @@
 import { notFound } from "next/navigation";
 import { getOrgForMember } from "@/lib/site/queries";
+import {
+  PageHeader,
+  SectionHeading,
+  StatTile,
+  Avatar,
+  Badge,
+  EmptyState,
+} from "@/components/ui/primitives";
 import { setMemberStatus } from "./actions";
 
 type Row = {
@@ -15,11 +23,13 @@ function Action({
   userId,
   status,
   label,
+  primary,
 }: {
   slug: string;
   userId: string;
   status: string;
   label: string;
+  primary?: boolean;
 }) {
   return (
     <form action={setMemberStatus} className="inline">
@@ -28,7 +38,7 @@ function Action({
       <button
         name="status"
         value={status}
-        className="rounded-[var(--radius)] border border-border px-2 py-1 text-xs text-muted-foreground hover:border-foreground"
+        className={`btn ${primary ? "btn-primary" : "btn-outline"} !px-3 !py-1.5 text-xs`}
       >
         {label}
       </button>
@@ -59,63 +69,87 @@ export default async function MembrosPage({
     const byId = new Map((profs ?? []).map((p) => [p.user_id, p]));
     for (const r of rows) r.profile = byId.get(r.user_id);
   }
+
   const pending = rows.filter((r) => r.status === "pending");
-  const others = rows.filter((r) => r.status !== "pending");
+  const active = rows.filter((r) => r.status === "active");
+  const blocked = rows.filter((r) => r.status === "blocked");
 
   return (
-    <div className="space-y-6">
-      <section>
-        <h2 className="font-medium">Aguardando aprovação ({pending.length})</h2>
-        {pending.length === 0 && (
-          <p className="mt-1 text-sm text-muted-foreground">Nada pendente.</p>
+    <>
+      <PageHeader
+        kicker="Comunidade"
+        title="Membros e equipe"
+        description="Aprove quem se cadastrou pelo site e gerencie o acesso da equipe."
+      />
+
+      <div className="mb-8 grid grid-cols-3 gap-3">
+        <StatTile label="Aguardando" value={pending.length} icon="hourglass_top" />
+        <StatTile label="Ativos" value={active.length} icon="verified" />
+        <StatTile label="Bloqueados" value={blocked.length} icon="block" />
+      </div>
+
+      <section className="mb-10">
+        <SectionHeading kicker="Fila de aprovação" title="Aguardando aprovação" />
+        {pending.length === 0 ? (
+          <EmptyState icon="inbox">Nada pendente no momento.</EmptyState>
+        ) : (
+          <ul className="space-y-2">
+            {pending.map((r) => (
+              <li
+                key={r.user_id}
+                className="card flex flex-wrap items-center gap-3 p-3"
+              >
+                <Avatar name={r.profile?.full_name || "?"} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium">
+                    {r.profile?.full_name || "Sem nome"}
+                  </p>
+                  {r.profile?.phone && (
+                    <p className="text-xs text-muted-foreground">{r.profile.phone}</p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Action slug={slug} userId={r.user_id} status="active" label="Aprovar" primary />
+                  <Action slug={slug} userId={r.user_id} status="blocked" label="Recusar" />
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
-        <ul className="mt-2 space-y-2">
-          {pending.map((r) => (
-            <li
-              key={r.user_id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius)] border border-border bg-card p-3"
-            >
-              <span className="text-sm">
-                {r.profile?.full_name || "Sem nome"}
-                {r.profile?.phone ? ` · ${r.profile.phone}` : ""}
-              </span>
-              <span className="flex gap-1">
-                <Action slug={slug} userId={r.user_id} status="active" label="Aprovar" />
-                <Action slug={slug} userId={r.user_id} status="blocked" label="Recusar" />
-              </span>
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section>
-        <h2 className="font-medium">Membros e equipe ({others.length})</h2>
-        <ul className="mt-2 space-y-2">
-          {others.map((r) => (
-            <li
-              key={r.user_id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius)] border border-border bg-card p-3"
-            >
-              <span className="text-sm">
-                {r.profile?.full_name || "Sem nome"}
-                <span className="text-muted-foreground">
-                  {" · "}
-                  {r.role}
-                  {r.status === "blocked" ? " · bloqueado" : ""}
-                </span>
-              </span>
-              <span className="flex gap-1">
+        <SectionHeading
+          kicker="Diretório"
+          title="Membros e equipe"
+          aside={`${active.length + blocked.length} pessoas`}
+        />
+        <div className="card divide-y divide-border">
+          {[...active, ...blocked].map((r) => (
+            <div key={r.user_id} className="flex flex-wrap items-center gap-3 p-3">
+              <Avatar name={r.profile?.full_name || "?"} />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">
+                  {r.profile?.full_name || "Sem nome"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {r.profile?.phone || "—"}
+                </p>
+              </div>
+              <Badge tone={r.role === "owner" ? "solid" : "outline"}>{r.role}</Badge>
+              {r.status === "blocked" && <Badge>bloqueado</Badge>}
+              <div className="flex gap-2">
                 {r.status === "active" && r.role !== "owner" && (
                   <Action slug={slug} userId={r.user_id} status="blocked" label="Bloquear" />
                 )}
                 {r.status === "blocked" && (
-                  <Action slug={slug} userId={r.user_id} status="active" label="Reativar" />
+                  <Action slug={slug} userId={r.user_id} status="active" label="Reativar" primary />
                 )}
-              </span>
-            </li>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
-    </div>
+    </>
   );
 }
