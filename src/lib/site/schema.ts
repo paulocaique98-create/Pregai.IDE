@@ -57,9 +57,9 @@ export const SECTION_DEFAULT_TITLES: Record<SectionKey, { title: string; subtitl
     subtitle: "A vida da igreja acontece de muitas formas ao longo da semana.",
   },
   media: {
-    title: "Assista e conheça mais",
+    title: "Reassista a última transmissão",
     subtitle:
-      "Acompanhe nossas mensagens, cultos e conteúdos para conhecer melhor a visão da igreja.",
+      "Não pôde estar presente? Assista ao culto mais recente e acompanhe a mensagem.",
   },
   events: {
     title: "Próximos encontros",
@@ -92,7 +92,7 @@ export interface SiteConfig {
   about: { description?: string; values?: string[] };
   schedule: { label: string; time: string }[];
   faq: { q: string; a: string }[];
-  media: { youtubeEmbedUrl?: string };
+  media: { youtubeEmbedUrl?: string; lastLiveLabel?: string; lastLiveDate?: string };
   giving: { description?: string; pixKey?: string; showSection?: boolean };
   sections_visibility: Partial<Record<SectionKey, boolean>>;
   section_titles: Partial<Record<SectionKey, { title?: string; subtitle?: string }>>;
@@ -112,6 +112,19 @@ export const DEFAULT_VISIBILITY: Record<SectionKey, boolean> = {
   contact: true,
   giving: true,
 };
+
+/** Aceita link do YouTube (watch, youtu.be, live, shorts) ou já-embed e devolve URL de embed. */
+export function toYoutubeEmbed(url?: string): string | undefined {
+  if (!url) return undefined;
+  const u = url.trim();
+  if (u.includes("/embed/")) return u;
+  const m =
+    u.match(/[?&]v=([\w-]{11})/) ||
+    u.match(/youtu\.be\/([\w-]{11})/) ||
+    u.match(/\/live\/([\w-]{11})/) ||
+    u.match(/\/shorts\/([\w-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : u;
+}
 
 export function resolveTitle(
   cfg: Pick<SiteConfig, "section_titles" | "branding">,

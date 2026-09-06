@@ -4,6 +4,7 @@ import { getPublishedSite } from "@/lib/site/queries";
 import {
   DEFAULT_VISIBILITY,
   resolveTitle,
+  toYoutubeEmbed,
   type SectionKey,
 } from "@/lib/site/schema";
 import { PrayerForm } from "./PrayerForm";
@@ -149,14 +150,25 @@ export default async function IgrejaPublicPage({
         </Section>
       )}
 
-      {show("media") && site.media?.youtubeEmbedUrl && (
+      {show("media") && toYoutubeEmbed(site.media?.youtubeEmbedUrl) && (
         <Section id="midia" {...t("media")}>
+          {(site.media?.lastLiveLabel || site.media?.lastLiveDate) && (
+            <p className="mb-4 text-sm font-medium">
+              {site.media?.lastLiveLabel}
+              {site.media?.lastLiveDate && (
+                <span className="text-muted-foreground">
+                  {site.media?.lastLiveLabel ? " · " : ""}
+                  {site.media.lastLiveDate}
+                </span>
+              )}
+            </p>
+          )}
           <div className="aspect-video w-full overflow-hidden rounded-[var(--radius)] border border-border">
             <iframe
-              src={site.media.youtubeEmbedUrl}
+              src={toYoutubeEmbed(site.media?.youtubeEmbedUrl)}
               className="h-full w-full"
               allowFullScreen
-              title="Vídeo"
+              title="Última transmissão"
             />
           </div>
         </Section>

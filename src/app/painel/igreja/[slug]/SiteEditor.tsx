@@ -171,14 +171,34 @@ export function SiteEditor({
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-medium">Mídia</h2>
+        <h2 className="font-medium">Última transmissão (seção Mídia)</h2>
+        <p className="text-sm text-muted-foreground">
+          Vídeo fixado para visitantes e membros reassistirem o culto mais recente.
+        </p>
         <label className={field}>
-          <span>URL de embed do YouTube</span>
+          <span>Link do YouTube da última live</span>
           <input
             className={input}
-            placeholder="https://www.youtube.com/embed/..."
+            placeholder="Cole o link (watch, youtu.be, /live/...)"
             value={cfg.media.youtubeEmbedUrl ?? ""}
             onChange={(e) => patch({ media: { ...cfg.media, youtubeEmbedUrl: e.target.value } })}
+          />
+        </label>
+        <label className={field}>
+          <span>Rótulo (ex: “Culto de Domingo — Série Efésios”)</span>
+          <input
+            className={input}
+            value={cfg.media.lastLiveLabel ?? ""}
+            onChange={(e) => patch({ media: { ...cfg.media, lastLiveLabel: e.target.value } })}
+          />
+        </label>
+        <label className={field}>
+          <span>Data</span>
+          <input
+            className={input}
+            placeholder="01/09/2026"
+            value={cfg.media.lastLiveDate ?? ""}
+            onChange={(e) => patch({ media: { ...cfg.media, lastLiveDate: e.target.value } })}
           />
         </label>
       </section>
