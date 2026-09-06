@@ -12,9 +12,5 @@ export default async function SitePainelPage({
   const site = await getSiteConfig(ctx.org.id);
   if (!site) notFound();
 
-  return (
-    <main className="mx-auto w-full max-w-3xl flex-1 p-6">
-      <SiteEditor slug={slug} orgName={ctx.org.name} initial={site} />
-    </main>
-  );
+  return <SiteEditor slug={slug} orgName={ctx.org.name} initial={site} />;
 }
