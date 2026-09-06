@@ -7,6 +7,7 @@ import {
   type SectionKey,
 } from "@/lib/site/schema";
 import { PrayerForm } from "./PrayerForm";
+import { SiteNav } from "./SiteNav";
 
 export const revalidate = 60;
 
@@ -40,7 +41,7 @@ function Section({
   children?: React.ReactNode;
 }) {
   return (
-    <section id={id} className="border-b border-border px-6 py-20">
+    <section id={id} className="scroll-mt-20 border-b border-border px-6 py-20">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="font-[family-name:var(--font-display)] text-3xl">{title}</h2>
         {subtitle && <p className="mt-3 text-muted-foreground">{subtitle}</p>}
@@ -73,10 +74,18 @@ export default async function IgrejaPublicPage({
   };
 
   return (
-    <main className="flex-1">
+    <main className="flex-1 pb-14 md:pb-0">
+      <span id="top" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <SiteNav
+        slug={slug}
+        orgName={site.branding?.name || org.name}
+        logoUrl={site.branding?.logoUrl}
+        visible={show}
       />
 
       {show("hero") && (
