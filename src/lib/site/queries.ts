@@ -24,6 +24,49 @@ export async function getOrgForMember(slug: string) {
   return { org, role: membership.role as string, supabase };
 }
 
+const STAFF = ["owner", "pastor", "secretaria", "lider"];
+
+/** Entrada no painel: staff da igreja OU líder de algum departamento. */
+export async function getOrgForPanel(slug: string) {
+  const { supabase, user } = await requireUser();
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id, name, slug, plan, subscription_status")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (!org) return null;
+
+  const { data: membership } = await supabase
+    .from("organization_members")
+    .select("role, status")
+    .eq("org_id", org.id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const isStaff =
+    membership?.status === "active" && STAFF.includes(membership.role);
+
+  const { count } = await supabase
+    .from("department_members")
+    .select("department_id", { count: "exact", head: true })
+    .eq("org_id", org.id)
+    .eq("user_id", user.id)
+    .eq("role", "leader")
+    .eq("status", "active");
+  const leadsAny = (count ?? 0) > 0;
+
+  if (!isStaff && !leadsAny) return null;
+
+  return {
+    org,
+    supabase,
+    user,
+    role: membership?.role ?? "membro",
+    isStaff,
+    leadsAny,
+  };
+}
+
 export async function getSiteConfig(orgId: string) {
   const { supabase } = await requireUser();
   const { data } = await supabase

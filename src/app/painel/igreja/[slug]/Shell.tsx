@@ -5,12 +5,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sym } from "@/components/ui/primitives";
 
-const NAV = [
+const STAFF_NAV = [
   { seg: "", label: "Site", icon: "home", exact: true },
   { seg: "ministerios", label: "Ministérios", icon: "diversity_3" },
   { seg: "agenda", label: "Agenda", icon: "calendar_month" },
+  { seg: "departamentos", label: "Departamentos", icon: "workspaces" },
   { seg: "oracoes", label: "Oração", icon: "volunteer_activism" },
   { seg: "membros", label: "Membros", icon: "group" },
+];
+const LEADER_NAV = [
+  { seg: "departamentos", label: "Meus departamentos", icon: "workspaces", exact: false },
 ];
 
 export function Shell({
@@ -18,6 +22,7 @@ export function Shell({
   orgName,
   userEmail,
   published,
+  isStaff,
   children,
   signOut,
 }: {
@@ -25,12 +30,14 @@ export function Shell({
   orgName: string;
   userEmail: string;
   published: boolean;
+  isStaff: boolean;
   children: React.ReactNode;
   signOut: () => void;
 }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const base = `/painel/igreja/${slug}`;
+  const NAV = isStaff ? STAFF_NAV : LEADER_NAV;
   const active = (n: (typeof NAV)[number]) => {
     const href = n.seg ? `${base}/${n.seg}` : base;
     return n.exact ? path === href : path.startsWith(href);
