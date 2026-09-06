@@ -227,6 +227,26 @@ export function SiteEditor({
             onChange={(e) => patch({ giving: { ...cfg.giving, pixKey: e.target.value } })}
           />
         </label>
+        <div className="flex gap-2">
+          <label className={field}>
+            <span>Nome do recebedor (para o QR)</span>
+            <input
+              className={input}
+              placeholder={cfg.branding.name ?? "Nome da igreja"}
+              value={cfg.giving.pixName ?? ""}
+              onChange={(e) => patch({ giving: { ...cfg.giving, pixName: e.target.value } })}
+            />
+          </label>
+          <label className={field}>
+            <span>Cidade</span>
+            <input
+              className={input}
+              placeholder="Ex: São Paulo"
+              value={cfg.giving.pixCity ?? ""}
+              onChange={(e) => patch({ giving: { ...cfg.giving, pixCity: e.target.value } })}
+            />
+          </label>
+        </div>
         <label className={field}>
           <span>Descrição</span>
           <textarea

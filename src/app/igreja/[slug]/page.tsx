@@ -7,8 +7,12 @@ import {
   toYoutubeEmbed,
   type SectionKey,
 } from "@/lib/site/schema";
+import QRCode from "qrcode";
+import { pixPayload } from "@/lib/site/pix";
 import { PrayerForm } from "./PrayerForm";
 import { SiteNav } from "./SiteNav";
+import { PWARegister } from "./PWARegister";
+import { PixBox } from "./PixBox";
 
 export const revalidate = 60;
 
@@ -19,12 +23,21 @@ export async function generateMetadata({
   const data = await getPublishedSite(slug);
   if (!data) return { title: "Site não encontrado" };
   const { org, site } = data;
+  const title = site.seo?.title ?? org.name;
+  const description = site.seo?.description ?? site.hero?.subtitle;
+  const themeColor =
+    site.theme_config?.defaultMode === "light" ? "#ffffff" : "#0a0a0a";
   return {
-    title: site.seo?.title ?? org.name,
-    description: site.seo?.description ?? site.hero?.subtitle,
+    title,
+    description,
+    manifest: `/igreja/${slug}/manifest.webmanifest`,
+    appleWebApp: { capable: true, title: org.name, statusBarStyle: "default" },
+    other: { "theme-color": themeColor },
+    alternates: { canonical: `/igreja/${slug}` },
     openGraph: {
-      title: site.seo?.title ?? org.name,
-      description: site.seo?.description ?? site.hero?.subtitle,
+      title,
+      description,
+      url: `/igreja/${slug}`,
       images: site.seo?.ogImageUrl ?? site.hero?.coverImageUrl,
     },
   };
@@ -74,9 +87,21 @@ export default async function IgrejaPublicPage({
     email: site.contact?.email,
   };
 
+  const pixCode = site.giving?.pixKey
+    ? pixPayload({
+        key: site.giving.pixKey,
+        name: site.giving.pixName || site.branding?.name || org.name,
+        city: site.giving.pixCity || "",
+      })
+    : "";
+  const pixQr = pixCode
+    ? await QRCode.toDataURL(pixCode, { margin: 1, width: 240 })
+    : undefined;
+
   return (
     <main className="flex-1 pb-14 md:pb-0">
       <span id="top" />
+      <PWARegister />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -212,11 +237,15 @@ export default async function IgrejaPublicPage({
 
       {show("giving") && (
         <Section id="contribuir" {...t("giving")}>
-          {site.giving?.description && <p>{site.giving.description}</p>}
+          {site.giving?.description && (
+            <p className="mb-6">{site.giving.description}</p>
+          )}
           {site.giving?.pixKey && (
-            <p className="mt-4 rounded-[var(--radius)] border border-border p-3 font-mono text-sm">
-              PIX: {site.giving.pixKey}
-            </p>
+            <PixBox
+              pixKey={site.giving.pixKey}
+              payload={pixCode}
+              qrDataUrl={pixQr}
+            />
           )}
         </Section>
       )}
@@ -227,9 +256,18 @@ export default async function IgrejaPublicPage({
           {site.contact?.address ? ` · ${site.contact.address}` : ""}
           {site.contact?.whatsapp ? ` · ${site.contact.whatsapp}` : ""}
         </p>
-        <p>
+        <p className="flex flex-wrap justify-center gap-x-4 gap-y-1">
           <a href={`/igreja/${slug}/entrar`} className="underline">
             Área do membro
+          </a>
+          <a href={`/igreja/${slug}/instalar`} className="underline">
+            Instalar app
+          </a>
+          <a href="/privacidade" className="underline">
+            Privacidade
+          </a>
+          <a href="/termos" className="underline">
+            Termos
           </a>
         </p>
       </footer>

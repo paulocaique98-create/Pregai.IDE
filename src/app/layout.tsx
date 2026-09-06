@@ -6,7 +6,10 @@ const sans = Inter({ variable: "--font-sans", subsets: ["latin"] });
 const display = Playfair_Display({ variable: "--font-display", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Pregai",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  ),
+  title: { default: "Pregai", template: "%s · Pregai" },
   description: "Sites e operação para igrejas.",
 };
 

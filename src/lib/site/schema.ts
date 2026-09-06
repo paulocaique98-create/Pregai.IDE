@@ -93,7 +93,13 @@ export interface SiteConfig {
   schedule: { label: string; time: string }[];
   faq: { q: string; a: string }[];
   media: { youtubeEmbedUrl?: string; lastLiveLabel?: string; lastLiveDate?: string };
-  giving: { description?: string; pixKey?: string; showSection?: boolean };
+  giving: {
+    description?: string;
+    pixKey?: string;
+    pixName?: string;
+    pixCity?: string;
+    showSection?: boolean;
+  };
   sections_visibility: Partial<Record<SectionKey, boolean>>;
   section_titles: Partial<Record<SectionKey, { title?: string; subtitle?: string }>>;
   theme_config: { defaultMode: "dark" | "light"; allowToggle: boolean };
