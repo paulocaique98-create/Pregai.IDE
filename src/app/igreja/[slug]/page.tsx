@@ -161,7 +161,16 @@ export default async function IgrejaPublicPage({
         </Section>
       )}
 
-      {show("firstTime") && <Section id="primeira-vez" {...t("firstTime")} />}
+      {show("firstTime") && (
+        <Section id="primeira-vez" {...t("firstTime")}>
+          <a
+            href={`/igreja/${slug}/primeira-vez`}
+            className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-border px-4 py-2 text-sm hover:border-foreground"
+          >
+            Saiba o que esperar
+          </a>
+        </Section>
+      )}
 
       {show("schedule") && (
         <Section id="horarios" {...t("schedule")}>

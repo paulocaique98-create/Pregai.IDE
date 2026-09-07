@@ -53,6 +53,7 @@ export function SiteEditor({
         social_links: cfg.social_links,
         hero: cfg.hero,
         about: cfg.about,
+        first_time: cfg.first_time ?? {},
         giving: cfg.giving,
         media: cfg.media,
         section_titles: cfg.section_titles,
@@ -199,6 +200,43 @@ export function SiteEditor({
             value={cfg.about.description ?? ""}
             onChange={(e) => patch({ about: { ...cfg.about, description: e.target.value } })}
           />
+        </Card>
+
+        <Card
+          title="Primeira vez (página do visitante)"
+          hint="Conteúdo de /primeira-vez. Deixe um campo em branco para ele não aparecer."
+        >
+          <Field label="Texto de acolhimento">
+            <textarea
+              className="field-input"
+              rows={3}
+              value={cfg.first_time?.intro ?? ""}
+              onChange={(e) =>
+                patch({ first_time: { ...cfg.first_time, intro: e.target.value } })
+              }
+            />
+          </Field>
+          {(
+            [
+              ["duration", "Duração do culto", "cerca de 1h30"],
+              ["dressCode", "Como se vestir", "venha como se sentir confortável"],
+              ["kids", "Ministério infantil", "há sala para crianças de 0 a 10 anos"],
+              ["parking", "Estacionamento", "gratuito na lateral da igreja"],
+              ["whatToBring", "O que levar", "só você; Bíblias disponíveis na entrada"],
+              ["arrival", "Quando chegar", "10 a 15 minutos antes"],
+            ] as const
+          ).map(([key, label, ph]) => (
+            <Field key={key} label={label}>
+              <input
+                className="field-input"
+                placeholder={ph}
+                value={cfg.first_time?.[key] ?? ""}
+                onChange={(e) =>
+                  patch({ first_time: { ...cfg.first_time, [key]: e.target.value } })
+                }
+              />
+            </Field>
+          ))}
         </Card>
 
         <Card title="Contato">

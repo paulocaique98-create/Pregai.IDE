@@ -34,7 +34,11 @@ export function SiteNav({
 }) {
   const links = (Object.entries(NAV) as [SectionKey, { label: string; anchor: string }][])
     .filter(([k]) => visible(k))
-    .map(([, v]) => v);
+    .map(([k, v]) => ({
+      ...v,
+      anchor:
+        k === "firstTime" ? `/igreja/${slug}/primeira-vez` : v.anchor,
+    }));
 
   const memberHref = `/igreja/${slug}/entrar`;
 

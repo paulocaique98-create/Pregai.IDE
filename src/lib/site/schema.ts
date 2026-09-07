@@ -90,6 +90,15 @@ export interface SiteConfig {
     coverImageUrl?: string;
   };
   about: { description?: string; values?: string[] };
+  first_time?: {
+    intro?: string;
+    duration?: string;
+    dressCode?: string;
+    kids?: string;
+    parking?: string;
+    whatToBring?: string;
+    arrival?: string;
+  };
   schedule: { label: string; time: string }[];
   faq: { q: string; a: string }[];
   media: { youtubeEmbedUrl?: string; lastLiveLabel?: string; lastLiveDate?: string };
