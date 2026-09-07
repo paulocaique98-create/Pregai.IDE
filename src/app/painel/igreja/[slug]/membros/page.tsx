@@ -1,5 +1,5 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getOrgForMember } from "@/lib/site/queries";
 import {
   PageHeader,
   SectionHeading,
@@ -7,211 +7,204 @@ import {
   Avatar,
   Badge,
   EmptyState,
+  Sym,
 } from "@/components/ui/primitives";
 import { appUrl } from "@/lib/site/urls";
-import { setMemberStatus, createInvite, deleteInvite } from "./actions";
-import { RoleSelect } from "./RoleSelect";
-import { InviteLink } from "./InviteLink";
-
-type Row = {
-  user_id: string;
-  role: string;
-  status: string;
-  created_at: string;
-  profile?: { full_name: string | null; phone: string | null };
-};
-
-function Action({
-  slug,
-  userId,
-  status,
-  label,
-  primary,
-}: {
-  slug: string;
-  userId: string;
-  status: string;
-  label: string;
-  primary?: boolean;
-}) {
-  return (
-    <form action={setMemberStatus} className="inline">
-      <input type="hidden" name="slug" value={slug} />
-      <input type="hidden" name="user_id" value={userId} />
-      <button
-        name="status"
-        value={status}
-        className={`btn ${primary ? "btn-primary" : "btn-outline"} !px-3 !py-1.5 text-xs`}
-      >
-        {label}
-      </button>
-    </form>
-  );
-}
+import { listMembers, PAGE_SIZE } from "@/lib/members/queries";
+import { ROLE_LABEL, STATUS_LABEL, type MemberStatus, type OrgRole } from "@/lib/members/policy";
+import { MembersToolbar } from "./MembersToolbar";
+import { MemberRowActions } from "./MemberRowActions";
+import { InvitePanel, type InviteView } from "./InvitePanel";
 
 export default async function MembrosPage({
   params,
+  searchParams,
 }: PageProps<"/painel/igreja/[slug]/membros">) {
   const { slug } = await params;
-  const ctx = await getOrgForMember(slug);
-  if (!ctx) notFound();
+  const sp = await searchParams;
+  const get = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
 
-  const { data } = await ctx.supabase
-    .from("organization_members")
-    .select("user_id, role, status, created_at")
-    .eq("org_id", ctx.org.id)
-    .order("created_at", { ascending: false });
+  const page = Math.max(1, Number(get("page")) || 1);
+  const data = await listMembers(slug, {
+    search: get("q"),
+    status: get("status") as MemberStatus | "",
+    role: get("role") as OrgRole | "",
+    sort: (get("sort") as "recent" | "name" | "oldest") || "recent",
+    page,
+  });
+  if (!data) notFound();
 
-  const rows = (data ?? []) as Row[];
-  const ids = rows.map((r) => r.user_id);
-  if (ids.length) {
-    const { data: profs } = await ctx.supabase
-      .from("profiles")
-      .select("user_id, full_name, phone")
-      .in("user_id", ids);
-    const byId = new Map((profs ?? []).map((p) => [p.user_id, p]));
-    for (const r of rows) r.profile = byId.get(r.user_id);
+  const { ctx, result } = data;
+  const meId = ctx.user.id;
+  const actorRole = result.actor_role;
+  const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
+
+  // contagens por status (baratas, head+count) — só para a equipe
+  let counts: Record<MemberStatus, number> | null = null;
+  let invites: InviteView[] = [];
+  if (result.can_manage) {
+    const [pend, act, blk, inv] = await Promise.all([
+      ctx.supabase
+        .from("organization_members")
+        .select("user_id", { count: "exact", head: true })
+        .eq("org_id", ctx.org.id)
+        .eq("status", "pending"),
+      ctx.supabase
+        .from("organization_members")
+        .select("user_id", { count: "exact", head: true })
+        .eq("org_id", ctx.org.id)
+        .eq("status", "active"),
+      ctx.supabase
+        .from("organization_members")
+        .select("user_id", { count: "exact", head: true })
+        .eq("org_id", ctx.org.id)
+        .eq("status", "blocked"),
+      ctx.supabase
+        .from("organization_invites")
+        .select("id, token, label, role, auto_approve, expires_at, used_at, revoked_at")
+        .eq("org_id", ctx.org.id)
+        .order("created_at", { ascending: false })
+        .limit(20),
+    ]);
+    counts = {
+      pending: pend.count ?? 0,
+      active: act.count ?? 0,
+      blocked: blk.count ?? 0,
+    };
+    invites = (inv.data ?? []) as InviteView[];
   }
 
-  const pending = rows.filter((r) => r.status === "pending");
-  const active = rows.filter((r) => r.status === "active");
-  const blocked = rows.filter((r) => r.status === "blocked");
-
-  const { data: invites } = await ctx.supabase
-    .from("organization_invites")
-    .select("id, token, label, auto_approve, created_at")
-    .eq("org_id", ctx.org.id)
-    .order("created_at", { ascending: false });
+  const qsFor = (p: number) => {
+    const next = new URLSearchParams();
+    for (const k of ["q", "status", "role", "sort"]) if (get(k)) next.set(k, get(k));
+    if (p > 1) next.set("page", String(p));
+    const s = next.toString();
+    return s ? `?${s}` : "";
+  };
 
   return (
     <>
       <PageHeader
         kicker="Comunidade"
         title="Membros e equipe"
-        description="Aprove quem se cadastrou pelo site e gerencie o acesso da equipe."
+        description={
+          result.scoped
+            ? "Membros dos departamentos que você lidera (somente leitura)."
+            : "Aprove quem se cadastrou pelo site, gerencie papéis e o acesso da equipe."
+        }
       />
 
-      <div className="mb-8 grid grid-cols-3 gap-3">
-        <StatTile label="Aguardando" value={pending.length} icon="hourglass_top" />
-        <StatTile label="Ativos" value={active.length} icon="verified" />
-        <StatTile label="Bloqueados" value={blocked.length} icon="block" />
-      </div>
-
-      <section className="mb-10">
-        <SectionHeading
-          kicker="Convites"
-          title="Links de convite"
-          aside="Mande no grupo do WhatsApp"
-        />
-        <div className="space-y-2">
-          {(invites ?? []).map((inv) => (
-            <div key={inv.id} className="card min-w-0 p-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="flex min-w-0 flex-wrap items-center gap-1.5 text-sm font-medium">
-                  <span className="truncate">{inv.label || "Convite"}</span>
-                  {inv.auto_approve && <Badge>aprova na hora</Badge>}
-                </p>
-                <form action={deleteInvite} className="shrink-0">
-                  <input type="hidden" name="slug" value={slug} />
-                  <input type="hidden" name="id" value={inv.id} />
-                  <button className="btn btn-ghost !px-2 !py-1 text-xs text-danger">
-                    Revogar
-                  </button>
-                </form>
-              </div>
-              <div className="mt-2">
-                <InviteLink url={`${appUrl()}/c/${inv.token}`} />
-              </div>
-            </div>
-          ))}
+      {counts && (
+        <div className="mb-6 grid grid-cols-3 gap-3">
+          <StatTile label="Aguardando" value={counts.pending} icon="hourglass_top" />
+          <StatTile label="Ativos" value={counts.active} icon="verified" />
+          <StatTile label="Bloqueados" value={counts.blocked} icon="block" />
         </div>
-        <form
-          action={createInvite}
-          className="mt-3 space-y-3 rounded-[var(--radius-lg)] border border-dashed border-border p-3"
-        >
-          <input type="hidden" name="slug" value={slug} />
-          <input
-            name="label"
-            placeholder="Nome do convite (ex: Grupo dos novos)"
-            className="field-input w-full"
-          />
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="auto_approve" className="h-4 w-4 accent-[hsl(var(--primary))]" />
-              aprovar na hora
-            </label>
-            <button className="btn btn-primary">Gerar link</button>
-          </div>
-        </form>
-      </section>
+      )}
 
-      <section className="mb-10">
-        <SectionHeading kicker="Fila de aprovação" title="Aguardando aprovação" />
-        {pending.length === 0 ? (
-          <EmptyState icon="inbox">Nada pendente no momento.</EmptyState>
+      {result.can_manage && (
+        <section className="mb-10">
+          <SectionHeading kicker="Convites" title="Links de convite" aside="Expiram em 7 dias · uso único" />
+          <InvitePanel
+            slug={slug}
+            appUrl={appUrl()}
+            invites={invites}
+            canInviteStaff={result.can_role}
+            canAutoApprove={result.can_role}
+          />
+        </section>
+      )}
+
+      <section>
+        <SectionHeading
+          kicker="Diretório"
+          title="Membros"
+          aside={`${result.total} ${result.total === 1 ? "pessoa" : "pessoas"}`}
+        />
+
+        <MembersToolbar canFilterRole={!result.scoped} />
+
+        {result.rows.length === 0 ? (
+          <EmptyState icon="group">
+            {get("q") || get("status") || get("role")
+              ? "Nenhum membro corresponde ao filtro."
+              : "Nenhum membro ainda."}
+          </EmptyState>
         ) : (
           <ul className="space-y-2">
-            {pending.map((r) => (
-              <li
-                key={r.user_id}
-                className="card flex flex-wrap items-center gap-3 p-3"
-              >
-                <Avatar name={r.profile?.full_name || "?"} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">
-                    {r.profile?.full_name || "Sem nome"}
-                  </p>
-                  {r.profile?.phone && (
-                    <p className="text-xs text-muted-foreground">{r.profile.phone}</p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Action slug={slug} userId={r.user_id} status="active" label="Aprovar" primary />
-                  <Action slug={slug} userId={r.user_id} status="blocked" label="Recusar" />
+            {result.rows.map((m) => (
+              <li key={m.user_id} className="card p-4">
+                <div className="flex items-start gap-3">
+                  <Avatar name={m.full_name || m.email || "?"} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/painel/igreja/${slug}/membros/${m.user_id}`}
+                        className="text-sm font-semibold hover:underline"
+                      >
+                        {m.full_name || "Sem nome"}
+                      </Link>
+                      {m.role !== "membro" && (
+                        <Badge tone={m.role === "owner" ? "solid" : "outline"}>
+                          {ROLE_LABEL[m.role]}
+                        </Badge>
+                      )}
+                      {m.status !== "active" && (
+                        <Badge>{STATUS_LABEL[m.status]}</Badge>
+                      )}
+                    </div>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {[m.email, m.phone].filter(Boolean).join(" · ") || "sem contato"}
+                    </p>
+                    {m.departments.length > 0 && (
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {m.departments.join(", ")}
+                      </p>
+                    )}
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      entrou em {new Date(m.created_at).toLocaleDateString("pt-BR")}
+                    </p>
+
+                    {!result.scoped && (
+                      <div className="mt-3">
+                        <MemberRowActions
+                          slug={slug}
+                          actorRole={actorRole}
+                          userId={m.user_id}
+                          role={m.role}
+                          status={m.status}
+                          self={m.user_id === meId}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </li>
             ))}
           </ul>
         )}
-      </section>
 
-      <section>
-        <SectionHeading
-          kicker="Diretório"
-          title="Membros e equipe"
-          aside={`${active.length + blocked.length} pessoas`}
-        />
-        <div className="card divide-y divide-border">
-          {[...active, ...blocked].map((r) => (
-            <div key={r.user_id} className="flex flex-wrap items-center gap-3 p-3">
-              <Avatar name={r.profile?.full_name || "?"} />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">
-                  {r.profile?.full_name || "Sem nome"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {r.profile?.phone || "—"}
-                </p>
-              </div>
-              {r.role === "owner" ? (
-                <Badge tone="solid">owner</Badge>
-              ) : r.status === "active" ? (
-                <RoleSelect slug={slug} userId={r.user_id} role={r.role} />
-              ) : (
-                <Badge tone="outline">{r.role}</Badge>
-              )}
-              {r.status === "blocked" && <Badge>bloqueado</Badge>}
-              <div className="flex gap-2">
-                {r.status === "active" && r.role !== "owner" && (
-                  <Action slug={slug} userId={r.user_id} status="blocked" label="Bloquear" />
-                )}
-                {r.status === "blocked" && (
-                  <Action slug={slug} userId={r.user_id} status="active" label="Reativar" primary />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        {totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between text-sm">
+            <Link
+              href={qsFor(page - 1) || "?"}
+              aria-disabled={page <= 1}
+              className={`btn btn-outline !px-3 !py-1.5 text-xs ${page <= 1 ? "pointer-events-none opacity-40" : ""}`}
+            >
+              <Sym name="chevron_left" className="text-[16px]" /> Anterior
+            </Link>
+            <span className="text-xs text-muted-foreground">
+              Página {page} de {totalPages}
+            </span>
+            <Link
+              href={qsFor(page + 1)}
+              aria-disabled={page >= totalPages}
+              className={`btn btn-outline !px-3 !py-1.5 text-xs ${page >= totalPages ? "pointer-events-none opacity-40" : ""}`}
+            >
+              Próxima <Sym name="chevron_right" className="text-[16px]" />
+            </Link>
+          </div>
+        )}
       </section>
     </>
   );

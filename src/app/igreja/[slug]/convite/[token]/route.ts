@@ -22,7 +22,13 @@ export async function GET(
   const result = (data as { result?: string; slug?: string } | null)?.result;
   const targetSlug = (data as { slug?: string } | null)?.slug ?? slug;
 
-  if (result === "not_found" || result === "expired" || !result) {
+  if (
+    result === "not_found" ||
+    result === "expired" ||
+    result === "used" ||
+    result === "revoked" ||
+    !result
+  ) {
     return NextResponse.redirect(`${origin}/igreja/${slug}?convite=${result ?? "invalido"}`);
   }
 
