@@ -1,4 +1,5 @@
 import { getMemberContext } from "@/lib/site/member";
+import { formatEventDate } from "@/lib/site/schema";
 import { EmptyState, Sym } from "@/components/ui/primitives";
 
 export default async function MembroAgenda({
@@ -11,6 +12,7 @@ export default async function MembroAgenda({
     .from("site_events")
     .select("id, title, event_date, event_time, tag")
     .eq("org_id", ctx.org.id)
+    .order("event_date", { ascending: true, nullsFirst: false })
     .order("sort_order");
 
   return (
@@ -28,7 +30,7 @@ export default async function MembroAgenda({
               <div className="flex-1">
                 <p className="text-sm font-medium">{e.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {[e.event_date, e.event_time].filter(Boolean).join(" · ") ||
+                  {[formatEventDate(e.event_date), e.event_time].filter(Boolean).join(" · ") ||
                     "Data a confirmar"}
                 </p>
               </div>

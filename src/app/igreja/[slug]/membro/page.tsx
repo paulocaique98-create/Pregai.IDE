@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { getMemberContext } from "@/lib/site/member";
-import { toYoutubeEmbed } from "@/lib/site/schema";
+import { toYoutubeEmbed, formatEventDate } from "@/lib/site/schema";
 import { Sym, EmptyState } from "@/components/ui/primitives";
 import { DailyVerse, DailyVerseSkeleton } from "./DailyVerse";
 
@@ -16,7 +16,8 @@ export default async function MembroInicio({
       .from("site_events")
       .select("id, title, event_date, event_time, tag")
       .eq("org_id", ctx.org.id)
-      .order("sort_order")
+      .or(`event_date.gte.${new Date().toISOString().slice(0, 10)},event_date.is.null`)
+      .order("event_date", { ascending: true, nullsFirst: false })
       .limit(3),
     ctx.supabase
       .from("department_members")
@@ -79,7 +80,8 @@ export default async function MembroInicio({
                 <div className="flex-1">
                   <p className="text-sm font-medium">{e.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {[e.event_date, e.event_time].filter(Boolean).join(" · ") || "Data a confirmar"}
+                    {[formatEventDate(e.event_date), e.event_time].filter(Boolean).join(" · ") ||
+                      "Data a confirmar"}
                   </p>
                 </div>
                 {e.tag && (
@@ -93,17 +95,7 @@ export default async function MembroInicio({
         )}
       </section>
 
-      {/* 4º — Avisos (a desenvolver) */}
-      <section>
-        <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
-          <Sym name="campaign" className="text-[20px]" /> Avisos
-        </h2>
-        <EmptyState icon="notifications">
-          Os avisos da igreja aparecerão aqui.
-        </EmptyState>
-      </section>
-
-      {/* 5º — Onde você serve */}
+      {/* Onde você serve */}
       <section>
         <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
           <Sym name="workspaces" className="text-[20px]" /> Onde você serve

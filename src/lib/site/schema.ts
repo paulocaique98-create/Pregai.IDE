@@ -128,6 +128,13 @@ export const DEFAULT_VISIBILITY: Record<SectionKey, boolean> = {
   giving: true,
 };
 
+/** "2026-09-07" -> "07/09/2026" (sem depender de fuso). */
+export function formatEventDate(iso?: string | null): string {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return y && m && d ? `${d}/${m}/${y}` : iso;
+}
+
 /** Aceita link do YouTube (watch, youtu.be, live, shorts) ou já-embed e devolve URL de embed. */
 export function toYoutubeEmbed(url?: string): string | undefined {
   if (!url) return undefined;

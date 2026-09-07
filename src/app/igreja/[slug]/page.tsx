@@ -5,6 +5,7 @@ import {
   DEFAULT_VISIBILITY,
   resolveTitle,
   toYoutubeEmbed,
+  formatEventDate,
   type SectionKey,
 } from "@/lib/site/schema";
 import QRCode from "qrcode";
@@ -276,7 +277,7 @@ export default async function IgrejaPublicPage({
               <li key={e.id} className="flex justify-between border-b border-border py-2">
                 <span>{e.title}</span>
                 <span className="text-muted-foreground">
-                  {e.event_date} {e.event_time}
+                  {[formatEventDate(e.event_date), e.event_time].filter(Boolean).join(" · ")}
                 </span>
               </li>
             ))}
