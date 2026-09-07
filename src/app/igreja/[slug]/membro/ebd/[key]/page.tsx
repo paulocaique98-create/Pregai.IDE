@@ -45,12 +45,12 @@ export default async function LessonPage({
         )}
       </div>
 
-      <LessonNotes slug={slug} lessonKey={key} initial={note?.content ?? ""} />
-
       <article
         className="lesson-body card p-5"
         dangerouslySetInnerHTML={{ __html: lesson.html }}
       />
+
+      <LessonNotes slug={slug} lessonKey={key} initial={note?.content ?? ""} />
 
       <p className="text-center text-xs text-muted-foreground">
         Conteúdo de estudantesdabiblia.com.br (Lições CPAD)
