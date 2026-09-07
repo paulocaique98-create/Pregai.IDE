@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getMemberContext } from "@/lib/site/member";
+import { brandStyle } from "@/lib/site/color";
 import { signOut } from "@/app/entrar/actions";
 import { Sym } from "@/components/ui/primitives";
 import { MemberNav } from "./MemberNav";
@@ -50,7 +51,7 @@ export default async function MembroLayout({
   }
 
   return (
-    <div className="min-h-full pb-20">
+    <div className="min-h-full pb-20" style={brandStyle(ctx.site.branding?.primaryColor)}>
       <header className="sticky top-0 z-30 flex h-14 items-center border-b border-border bg-background/95 px-4 backdrop-blur">
         <Link
           href={`/igreja/${slug}/membro`}

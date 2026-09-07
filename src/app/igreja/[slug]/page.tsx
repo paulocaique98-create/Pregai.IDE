@@ -9,6 +9,7 @@ import {
 } from "@/lib/site/schema";
 import QRCode from "qrcode";
 import { pixPayload } from "@/lib/site/pix";
+import { brandStyle } from "@/lib/site/color";
 import { PrayerForm } from "./PrayerForm";
 import { SiteNav } from "./SiteNav";
 import { PWARegister } from "./PWARegister";
@@ -134,7 +135,7 @@ export default async function IgrejaPublicPage({
   ].filter(Boolean) as { icon: string; label: string; href: string }[];
 
   return (
-    <main className="flex-1 pb-14 md:pb-0">
+    <main className="flex-1 pb-14 md:pb-0" style={brandStyle(site.branding?.primaryColor)}>
       <span id="top" />
       <PWARegister />
       <script
