@@ -202,7 +202,7 @@ export default async function IgrejaPublicPage({
               href={site.social_links.youtube}
               target="_blank"
               rel="noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-[var(--radius)] bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-[#FF0000] px-5 py-3 text-sm font-semibold text-white"
             >
               <Sym name="smart_display" className="text-[18px]" />
               Inscreva-se no canal

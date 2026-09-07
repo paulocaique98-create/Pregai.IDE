@@ -64,7 +64,7 @@ export default async function MembroInicio({
               href={ctx.site.social_links.youtube}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-2 rounded-[var(--radius)] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-[#FF0000] px-4 py-2.5 text-sm font-semibold text-white"
             >
               <Sym name="smart_display" className="text-[18px]" />
               Inscreva-se no canal
