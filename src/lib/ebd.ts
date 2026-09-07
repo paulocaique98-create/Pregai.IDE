@@ -113,7 +113,11 @@ export const getEbdLesson = cache(async (key: string): Promise<EbdLesson | null>
   const end = html.indexOf('<div id="footer"');
   if (start === -1 || end === -1 || end <= start) return null;
 
-  const region = html.slice(start, end);
+  let region = html.slice(start, end);
+  // Remove a seção "Subsídios Ensinador Cristão" (e o que vier depois dela)
+  const cut = region.search(/<h6[^>]*>\s*SUBS[IÍ]DIOS\s+ENSINADOR/i);
+  if (cut !== -1) region = region.slice(0, cut);
+
   const title = decodeEntities(
     region
       .match(/<strong>Li[çc][ãa]o\s*\d+:<\/strong>([\s\S]*?)<\/p>/i)?.[1]
