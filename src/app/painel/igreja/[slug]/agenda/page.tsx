@@ -15,6 +15,7 @@ export default async function AgendaPage({
     .select("id, title, event_date, event_time, tag, sort_order")
     .eq("org_id", ctx.org.id)
     .order("event_date", { ascending: true, nullsFirst: false })
+    .order("event_time", { ascending: true, nullsFirst: false })
     .order("sort_order");
   const list = data ?? [];
 

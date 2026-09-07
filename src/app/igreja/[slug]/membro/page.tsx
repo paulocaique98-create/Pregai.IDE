@@ -18,6 +18,7 @@ export default async function MembroInicio({
       .eq("org_id", ctx.org.id)
       .or(`event_date.gte.${new Date().toISOString().slice(0, 10)},event_date.is.null`)
       .order("event_date", { ascending: true, nullsFirst: false })
+      .order("event_time", { ascending: true, nullsFirst: false })
       .limit(3),
     ctx.supabase
       .from("department_members")
@@ -50,7 +51,7 @@ export default async function MembroInicio({
       {video && (
         <section>
           <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
-            <Sym name="play_circle" className="text-[20px]" /> Última mensagem
+            <Sym name="play_circle" className="text-[20px]" /> Última live
           </h2>
           {ctx.site.media?.lastLiveLabel && (
             <p className="mb-2 text-sm font-medium">{ctx.site.media.lastLiveLabel}</p>

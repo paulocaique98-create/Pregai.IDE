@@ -13,6 +13,7 @@ export default async function MembroAgenda({
     .select("id, title, event_date, event_time, tag")
     .eq("org_id", ctx.org.id)
     .order("event_date", { ascending: true, nullsFirst: false })
+    .order("event_time", { ascending: true, nullsFirst: false })
     .order("sort_order");
 
   return (

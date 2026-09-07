@@ -94,6 +94,7 @@ export const getPublishedSite = cache(async (slug: string) => {
       .select("*")
       .eq("org_id", org.id)
       .order("event_date", { ascending: true, nullsFirst: false })
+      .order("event_time", { ascending: true, nullsFirst: false })
       .order("sort_order"),
   ]);
 
