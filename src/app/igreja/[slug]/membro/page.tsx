@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getMemberContext } from "@/lib/site/member";
+import { getDailyVerse } from "@/lib/verse";
 import { toYoutubeEmbed } from "@/lib/site/schema";
 import { Sym, EmptyState } from "@/components/ui/primitives";
 
@@ -26,6 +27,7 @@ export default async function MembroInicio({
   const firstName = (ctx.profile?.full_name || "").split(" ")[0];
   const video = toYoutubeEmbed(ctx.site.media?.youtubeEmbedUrl);
   const active = (myDepts ?? []).filter((d) => d.status === "active").length;
+  const verse = await getDailyVerse();
 
   return (
     <div className="space-y-8">
@@ -37,6 +39,24 @@ export default async function MembroInicio({
           Acompanhe a vida da igreja durante a semana.
         </p>
       </div>
+
+      {/* Versículo do dia */}
+      {verse && (
+        <Link
+          href={`/igreja/${slug}/membro/palavra`}
+          className="card block p-5 transition-colors hover:border-border-strong"
+        >
+          <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+            <Sym name="auto_stories" className="text-[16px]" /> Palavra do dia
+          </p>
+          <p className="mt-2 font-[family-name:var(--font-display)] text-base leading-relaxed">
+            “{verse.text}”
+          </p>
+          {verse.reference && (
+            <p className="mt-2 text-sm font-medium">{verse.reference}</p>
+          )}
+        </Link>
+      )}
 
       {/* Avisos — a desenvolver */}
       <section>

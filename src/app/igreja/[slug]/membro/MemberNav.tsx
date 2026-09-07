@@ -6,6 +6,7 @@ import { Sym } from "@/components/ui/primitives";
 
 const ITEMS = [
   { seg: "", label: "Início", icon: "home", exact: true },
+  { seg: "palavra", label: "Palavra", icon: "auto_stories" },
   { seg: "agenda", label: "Agenda", icon: "calendar_month" },
   { seg: "departamentos", label: "Servir", icon: "workspaces" },
   { seg: "perfil", label: "Perfil", icon: "person" },
@@ -16,7 +17,7 @@ export function MemberNav({ slug }: { slug: string }) {
   const base = `/igreja/${slug}/membro`;
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-background/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-background/95 backdrop-blur"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {ITEMS.map((i) => {
