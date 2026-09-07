@@ -26,6 +26,26 @@ export async function createAnnouncement(fd: FormData) {
   await ctx.supabase
     .from("announcements")
     .insert({ org_id: ctx.org.id, ...f, created_by: ctx.user.id });
+
+  if (f.is_published) {
+    const { data: members } = await ctx.supabase
+      .from("organization_members")
+      .select("user_id")
+      .eq("org_id", ctx.org.id)
+      .eq("status", "active");
+    const { notifyMany } = await import("@/lib/notify");
+    await notifyMany(
+      (members ?? []).map((m) => m.user_id).filter((id) => id !== ctx.user.id),
+      {
+        org_id: ctx.org.id,
+        kind: "announcement",
+        title: f.title,
+        body: f.body ? f.body.slice(0, 140) : "Novo aviso da igreja",
+        url: `/igreja/${slug}/membro/avisos`,
+      },
+    );
+  }
+
   revalidatePath(`/painel/igreja/${slug}/avisos`);
   revalidatePath(`/igreja/${slug}/membro`);
 }

@@ -2,6 +2,7 @@ import { getMemberContext } from "@/lib/site/member";
 import { signOut } from "@/app/entrar/actions";
 import { Sym } from "@/components/ui/primitives";
 import { updateProfile } from "../actions";
+import { PushToggle } from "../PushToggle";
 
 export default async function MembroPerfil({
   params,
@@ -43,6 +44,8 @@ export default async function MembroPerfil({
         </div>
         <button className="btn btn-primary">Salvar</button>
       </form>
+
+      <PushToggle />
 
       <form action={signOut}>
         <button className="btn btn-outline w-full">Sair da conta</button>

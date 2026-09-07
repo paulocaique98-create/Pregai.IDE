@@ -14,6 +14,16 @@ export default async function MembroLayout({
   const ctx = await getMemberContext(slug);
   const name = ctx.site.branding?.name || ctx.org.name;
 
+  let unread = 0;
+  if (ctx.status === "active" || ctx.status === "pending") {
+    const { count } = await ctx.supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", ctx.user.id)
+      .is("read_at", null);
+    unread = count ?? 0;
+  }
+
   if (ctx.status === "needs_confirm") {
     const other = ctx.otherOrgs?.find((o) => o.status === "active") ?? ctx.otherOrgs?.[0];
     return (
@@ -97,11 +107,25 @@ export default async function MembroLayout({
           <Sym name="church" className="text-[20px]" />
           <span className="max-w-[12rem] truncate">{name}</span>
         </Link>
-        {(ctx.activeMemberships ?? 0) > 1 && (
-          <Link href="/painel" className="text-xs text-muted-foreground underline">
-            trocar igreja
+        <div className="flex items-center gap-3">
+          {(ctx.activeMemberships ?? 0) > 1 && (
+            <Link href="/painel" className="text-xs text-muted-foreground underline">
+              trocar igreja
+            </Link>
+          )}
+          <Link
+            href={`/igreja/${slug}/membro/notificacoes`}
+            className="relative text-muted-foreground hover:text-foreground"
+            aria-label="Notificações"
+          >
+            <Sym name="notifications" className="text-[22px]" />
+            {unread > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white">
+                {unread > 9 ? "9+" : unread}
+              </span>
+            )}
           </Link>
-        )}
+        </div>
       </header>
 
       <div className="mx-auto max-w-2xl px-4 py-6">{children}</div>

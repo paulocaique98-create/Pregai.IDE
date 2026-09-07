@@ -76,7 +76,17 @@ export async function setMemberStatus(formData: FormData) {
     .eq("user_id", userId);
 
   if (status === "active" && before?.status !== "active") {
-    const { userEmail, sendEmail, tmpl } = await import("@/lib/email");
+    const [{ userEmail, sendEmail, tmpl }, { notify }] = await Promise.all([
+      import("@/lib/email"),
+      import("@/lib/notify"),
+    ]);
+    await notify(userId, {
+      org_id: ctx.org.id,
+      kind: "member_approved",
+      title: `Bem-vindo(a) à ${ctx.org.name}`,
+      body: "Seu cadastro de membro foi aprovado.",
+      url: `/igreja/${slug}/membro`,
+    });
     const to = await userEmail(userId);
     if (to) await sendEmail({ to, ...tmpl.memberApproved(ctx.org.name, slug) });
   }
