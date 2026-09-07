@@ -176,6 +176,16 @@ export function SiteEditor({
               onChange={(e) => patch({ media: { ...cfg.media, youtubeEmbedUrl: e.target.value } })}
             />
           </Field>
+          <Field label="Canal do YouTube da igreja (para o botão “Inscrever-se”)">
+            <input
+              className="field-input"
+              placeholder="https://youtube.com/@suaigreja"
+              value={cfg.social_links.youtube ?? ""}
+              onChange={(e) =>
+                patch({ social_links: { ...cfg.social_links, youtube: e.target.value } })
+              }
+            />
+          </Field>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Rótulo">
               <input
