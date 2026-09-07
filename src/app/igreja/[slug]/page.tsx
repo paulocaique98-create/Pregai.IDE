@@ -99,6 +99,38 @@ export default async function IgrejaPublicPage({
     ? await QRCode.toDataURL(pixCode, { margin: 1, width: 240 })
     : undefined;
 
+  const hasVideo = show("media") && !!toYoutubeEmbed(site.media?.youtubeEmbedUrl);
+
+  const navLinks = [
+    hasVideo && { label: "Última live", href: "#midia" },
+    show("firstTime") && { label: "Primeira vez", href: "#primeira-vez" },
+    show("schedule") && { label: "Horários", href: "#horarios" },
+    show("about") && { label: "Quem somos", href: "#quem-somos" },
+    show("ministries") && { label: "Ministérios", href: "#ministerios" },
+    show("events") && { label: "Agenda", href: "#eventos" },
+    show("prayer") && { label: "Oração", href: "#oracao" },
+    show("contact") && { label: "Contato", href: "#contato" },
+    show("giving") && { label: "Contribuir", href: "#contribuir" },
+  ].filter(Boolean) as { label: string; href: string }[];
+
+  const navActions = [
+    hasVideo && { icon: "play_circle", label: "Assistir", href: "#midia" },
+    show("schedule") && { icon: "schedule", label: "Horários", href: "#horarios" },
+    show("prayer") && { icon: "volunteer_activism", label: "Pedir oração", href: "#oracao" },
+    site.contact?.mapsUrl
+      ? { icon: "map", label: "Como chegar", href: site.contact.mapsUrl }
+      : show("contact") && { icon: "place", label: "Contato", href: "#contato" },
+    { icon: "how_to_reg", label: "Fazer parte", href: `/igreja/${slug}/entrar` },
+  ].filter(Boolean) as { icon: string; label: string; href: string }[];
+
+  const navBottom = [
+    { icon: "home", label: "Início", href: "#top" },
+    show("schedule") && { icon: "schedule", label: "Horários", href: "#horarios" },
+    show("prayer") && { icon: "volunteer_activism", label: "Oração", href: "#oracao" },
+    show("giving") && { icon: "pix", label: "Contribuir", href: "#contribuir" },
+    { icon: "person", label: "Membro", href: `/igreja/${slug}/entrar` },
+  ].filter(Boolean) as { icon: string; label: string; href: string }[];
+
   return (
     <main className="flex-1 pb-14 md:pb-0">
       <span id="top" />
@@ -112,7 +144,9 @@ export default async function IgrejaPublicPage({
         slug={slug}
         orgName={site.branding?.name || org.name}
         logoUrl={site.branding?.logoUrl}
-        visible={show}
+        links={navLinks}
+        actions={navActions}
+        bottom={navBottom}
       />
 
       {show("hero") && (
@@ -137,39 +171,6 @@ export default async function IgrejaPublicPage({
           </div>
         </section>
       )}
-
-      {/* Ações rápidas — rolagem na própria página, sem trocar de tela */}
-      {(() => {
-        const acts = [
-          show("media") && toYoutubeEmbed(site.media?.youtubeEmbedUrl)
-            ? { icon: "play_circle", label: "Assistir", href: "#midia" }
-            : null,
-          show("schedule") ? { icon: "schedule", label: "Horários", href: "#horarios" } : null,
-          show("prayer") ? { icon: "volunteer_activism", label: "Pedir oração", href: "#oracao" } : null,
-          site.contact?.mapsUrl
-            ? { icon: "map", label: "Como chegar", href: site.contact.mapsUrl }
-            : show("contact")
-              ? { icon: "place", label: "Contato", href: "#contato" }
-              : null,
-          { icon: "how_to_reg", label: "Fazer parte", href: `/igreja/${slug}/entrar` },
-        ].filter(Boolean) as { icon: string; label: string; href: string }[];
-        return (
-          <nav className="border-b border-border bg-surface">
-            <div className="mx-auto flex max-w-3xl gap-2 overflow-x-auto px-4 py-3">
-              {acts.map((a) => (
-                <a
-                  key={a.label}
-                  href={a.href}
-                  className="flex shrink-0 items-center gap-1.5 rounded-[var(--radius)] border border-border bg-card px-3 py-2 text-sm hover:border-foreground"
-                >
-                  <Sym name={a.icon} className="text-[18px]" />
-                  {a.label}
-                </a>
-              ))}
-            </div>
-          </nav>
-        );
-      })()}
 
       {show("media") && toYoutubeEmbed(site.media?.youtubeEmbedUrl) && (
         <Section id="midia" {...t("media")}>
