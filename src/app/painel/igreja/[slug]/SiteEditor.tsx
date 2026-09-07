@@ -187,6 +187,28 @@ export function SiteEditor({
             />
           </Field>
           <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Instagram">
+              <input
+                className="field-input"
+                placeholder="https://instagram.com/suaigreja"
+                value={cfg.social_links.instagram ?? ""}
+                onChange={(e) =>
+                  patch({ social_links: { ...cfg.social_links, instagram: e.target.value } })
+                }
+              />
+            </Field>
+            <Field label="Facebook">
+              <input
+                className="field-input"
+                placeholder="https://facebook.com/suaigreja"
+                value={cfg.social_links.facebook ?? ""}
+                onChange={(e) =>
+                  patch({ social_links: { ...cfg.social_links, facebook: e.target.value } })
+                }
+              />
+            </Field>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Rótulo">
               <input
                 className="field-input"
