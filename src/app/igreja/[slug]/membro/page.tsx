@@ -42,12 +42,9 @@ export default async function MembroInicio({
 
       {/* 1º — Palavra do dia */}
       {verse && (
-        <Link
-          href={`/igreja/${slug}/membro/devocional`}
-          className="card block p-5 transition-colors hover:border-border-strong"
-        >
+        <div className="card p-5">
           <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
-            <Sym name="auto_stories" className="text-[16px]" /> Palavra do dia
+            <Sym name="menu_book" className="text-[16px]" /> Palavra do dia
           </p>
           <p className="mt-2 font-[family-name:var(--font-display)] text-base leading-relaxed">
             “{verse.text}”
@@ -55,7 +52,7 @@ export default async function MembroInicio({
           {verse.reference && (
             <p className="mt-2 text-sm font-medium">{verse.reference}</p>
           )}
-        </Link>
+        </div>
       )}
 
       {/* 2º — Última mensagem */}
