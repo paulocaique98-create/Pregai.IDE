@@ -2,9 +2,12 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPublishedSite } from "@/lib/site/queries";
+import { isPlatformAdmin } from "@/lib/platform";
 import { signOut } from "@/app/entrar/actions";
 import { Badge, Sym } from "@/components/ui/primitives";
 import { joinDepartment, leaveDepartment } from "./actions";
+
+const STAFF = ["owner", "pastor", "secretaria", "lider"];
 
 export default async function MembroPage({
   params,
@@ -17,6 +20,26 @@ export default async function MembroPage({
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect(`/igreja/${slug}/entrar`);
   const uid = auth.user.id;
+
+  // Equipe / super-admin não fica na área do membro
+  if (isPlatformAdmin(auth.user.email)) redirect("/admin");
+  const { data: myRole } = await supabase
+    .from("organization_members")
+    .select("role, status")
+    .eq("org_id", data.org.id)
+    .eq("user_id", uid)
+    .maybeSingle();
+  if (myRole?.status === "active" && STAFF.includes(myRole.role)) {
+    redirect(`/painel/igreja/${slug}`);
+  }
+  const { count: leadCount } = await supabase
+    .from("department_members")
+    .select("department_id", { count: "exact", head: true })
+    .eq("org_id", data.org.id)
+    .eq("user_id", uid)
+    .eq("role", "leader")
+    .eq("status", "active");
+  if ((leadCount ?? 0) > 0) redirect(`/painel/igreja/${slug}/departamentos`);
 
   const { data: status } = await supabase.rpc("join_organization", { p_slug: slug });
 
