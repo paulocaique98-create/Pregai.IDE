@@ -1,8 +1,9 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { getMemberContext } from "@/lib/site/member";
-import { getDailyVerse } from "@/lib/verse";
 import { toYoutubeEmbed } from "@/lib/site/schema";
 import { Sym, EmptyState } from "@/components/ui/primitives";
+import { DailyVerse, DailyVerseSkeleton } from "./DailyVerse";
 
 export default async function MembroInicio({
   params,
@@ -27,7 +28,6 @@ export default async function MembroInicio({
   const firstName = (ctx.profile?.full_name || "").split(" ")[0];
   const video = toYoutubeEmbed(ctx.site.media?.youtubeEmbedUrl);
   const active = (myDepts ?? []).filter((d) => d.status === "active").length;
-  const verse = await getDailyVerse();
 
   return (
     <div className="space-y-8">
@@ -41,19 +41,9 @@ export default async function MembroInicio({
       </div>
 
       {/* 1º — Palavra do dia */}
-      {verse && (
-        <div className="card p-5">
-          <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
-            <Sym name="menu_book" className="text-[16px]" /> Palavra do dia
-          </p>
-          <p className="mt-2 font-[family-name:var(--font-display)] text-base leading-relaxed">
-            “{verse.text}”
-          </p>
-          {verse.reference && (
-            <p className="mt-2 text-sm font-medium">{verse.reference}</p>
-          )}
-        </div>
-      )}
+      <Suspense fallback={<DailyVerseSkeleton />}>
+        <DailyVerse />
+      </Suspense>
 
       {/* 2º — Última mensagem */}
       {video && (

@@ -18,8 +18,6 @@ export const getMemberContext = cache(async (slug: string) => {
 
   if (isPlatformAdmin(user.email)) redirect("/admin");
 
-  const { data: status } = await supabase.rpc("join_organization", { p_slug: slug });
-
   const [{ data: myRole }, { count: leadCount }, { data: profile }] = await Promise.all([
     supabase
       .from("organization_members")
@@ -41,7 +39,14 @@ export const getMemberContext = cache(async (slug: string) => {
       .maybeSingle(),
   ]);
 
-  if (myRole?.status === "active" && STAFF.includes(myRole.role))
+  // Só vincula (escrita) na primeira visita — não em toda navegação.
+  let status = myRole?.status ?? null;
+  if (!myRole) {
+    const { data: joined } = await supabase.rpc("join_organization", { p_slug: slug });
+    status = (joined as string) ?? "pending";
+  }
+
+  if (status === "active" && STAFF.includes(myRole?.role ?? ""))
     redirect(`/painel/igreja/${slug}`);
   if ((leadCount ?? 0) > 0) redirect(`/painel/igreja/${slug}/departamentos`);
 
