@@ -57,14 +57,7 @@ export const getOrgForPanel = cache(async (slug: string) => {
   const leadsAny = (count ?? 0) > 0;
   if (!isStaff && !leadsAny) return null;
 
-  return {
-    org,
-    supabase,
-    user,
-    role: membership?.role ?? "membro",
-    isStaff,
-    leadsAny,
-  };
+  return { org, supabase, user, role: membership?.role ?? "membro", isStaff, leadsAny };
 });
 
 export const getSiteConfig = cache(async (orgId: string) => {
