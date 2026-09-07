@@ -178,6 +178,60 @@ body {
   background: hsl(var(--surface));
 }
 
+.lesson-body {
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.lesson-body p {
+  margin: 0 0 0.85rem;
+}
+.lesson-body h1,
+.lesson-body h2 {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 1.6rem 0 0.6rem;
+}
+.lesson-body h6 {
+  margin: 1.8rem 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  border-top: 1px solid hsl(var(--border));
+  padding-top: 1rem;
+}
+.lesson-body ul,
+.lesson-body ol {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+}
+.lesson-body li {
+  margin-bottom: 0.4rem;
+}
+.lesson-body img {
+  border-radius: var(--radius);
+  margin: 0.5rem 0;
+  height: auto;
+}
+.lesson-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+}
+.lesson-body td,
+.lesson-body th {
+  border: 1px solid hsl(var(--border));
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+.lesson-body strong {
+  font-weight: 600;
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-weight: normal;
