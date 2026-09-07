@@ -10,6 +10,8 @@ function fields(formData: FormData) {
     event_time: String(formData.get("event_time") ?? "").trim() || null,
     tag: String(formData.get("tag") ?? "").trim() || null,
     sort_order: Number(formData.get("sort_order") ?? 0) || 0,
+    registration_open: formData.get("registration_open") === "on",
+    capacity: Number(formData.get("capacity")) || null,
   };
 }
 

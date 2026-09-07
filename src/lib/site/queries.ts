@@ -87,7 +87,7 @@ export const getPublishedSite = cache(async (slug: string) => {
     .maybeSingle();
   if (!site || !site.is_published) return null;
 
-  const [{ data: ministries }, { data: events }] = await Promise.all([
+  const [{ data: ministries }, { data: events }, { data: taken }] = await Promise.all([
     supabase.from("site_ministries").select("*").eq("org_id", org.id).order("sort_order"),
     supabase
       .from("site_events")
@@ -96,7 +96,26 @@ export const getPublishedSite = cache(async (slug: string) => {
       .order("event_date", { ascending: true, nullsFirst: false })
       .order("event_time", { ascending: true, nullsFirst: false })
       .order("sort_order"),
+    supabase.rpc("event_taken_counts", { p_org: org.id }),
   ]);
 
-  return { org, site: site as SiteConfig, ministries: ministries ?? [], events: events ?? [] };
+  const takenBy = new Map(
+    ((taken as { event_id: string; taken: number }[]) ?? []).map((t) => [t.event_id, Number(t.taken)]),
+  );
+  const eventsWithSpots = (events ?? []).map((e) => ({
+    ...e,
+    spotsLeft:
+      e.registration_open && e.capacity != null
+        ? Math.max(0, e.capacity - (takenBy.get(e.id) ?? 0))
+        : e.registration_open
+          ? null
+          : undefined,
+  }));
+
+  return {
+    org,
+    site: site as SiteConfig,
+    ministries: ministries ?? [],
+    events: eventsWithSpots,
+  };
 });

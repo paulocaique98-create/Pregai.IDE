@@ -13,6 +13,7 @@ import { pixPayload } from "@/lib/site/pix";
 import { brandStyle } from "@/lib/site/color";
 import { PrayerForm } from "./PrayerForm";
 import { VisitForm } from "./VisitForm";
+import { EventRegister } from "./EventRegister";
 import { SiteNav } from "./SiteNav";
 import { PWARegister } from "./PWARegister";
 import { PixBox } from "./PixBox";
@@ -292,11 +293,22 @@ export default async function IgrejaPublicPage({
         <Section id="eventos" {...t("events")}>
           <ul className="space-y-2 text-left">
             {events.map((e) => (
-              <li key={e.id} className="flex justify-between border-b border-border py-2">
-                <span>{e.title}</span>
-                <span className="text-muted-foreground">
-                  {[formatEventDate(e.event_date), e.event_time].filter(Boolean).join(" · ")}
-                </span>
+              <li key={e.id} className="border-b border-border py-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="font-medium">{e.title}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {[formatEventDate(e.event_date), e.event_time].filter(Boolean).join(" · ")}
+                  </span>
+                </div>
+                {(e as { registration_open?: boolean }).registration_open && (
+                  <div className="mt-2">
+                    <EventRegister
+                      slug={slug}
+                      eventId={e.id}
+                      spotsLeft={(e as { spotsLeft?: number | null }).spotsLeft ?? null}
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>

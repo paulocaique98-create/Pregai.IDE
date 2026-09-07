@@ -12,12 +12,22 @@ export default async function AgendaPage({
 
   const { data } = await ctx.supabase
     .from("site_events")
-    .select("id, title, event_date, event_time, tag, sort_order")
+    .select("id, title, event_date, event_time, tag, sort_order, capacity, registration_open")
     .eq("org_id", ctx.org.id)
     .order("event_date", { ascending: true, nullsFirst: false })
     .order("event_time", { ascending: true, nullsFirst: false })
     .order("sort_order");
   const list = data ?? [];
+
+  const { data: taken } = await ctx.supabase.rpc("event_taken_counts", {
+    p_org: ctx.org.id,
+  });
+  const takenBy = new Map(
+    ((taken as { event_id: string; taken: number }[]) ?? []).map((t) => [
+      t.event_id,
+      Number(t.taken),
+    ]),
+  );
 
   return (
     <>
@@ -84,8 +94,38 @@ export default async function AgendaPage({
                 />
               </div>
             </div>
-            <div className="flex gap-2 border-t border-border pt-3">
+            <div className="border-t border-border pt-3">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="registration_open"
+                  defaultChecked={(e as { registration_open?: boolean }).registration_open}
+                  className="h-4 w-4 accent-[hsl(var(--primary))]"
+                />
+                Aceitar inscrições
+                <span className="text-xs text-muted-foreground">
+                  ({takenBy.get(e.id) ?? 0} inscrito{(takenBy.get(e.id) ?? 0) === 1 ? "" : "s"})
+                </span>
+              </label>
+              <input
+                name="capacity"
+                type="number"
+                min="1"
+                defaultValue={(e as { capacity?: number | null }).capacity ?? ""}
+                placeholder="Limite de vagas (opcional)"
+                className="field-input mt-2"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 border-t border-border pt-3">
               <button className="btn btn-primary">Salvar</button>
+              {(takenBy.get(e.id) ?? 0) > 0 && (
+                <a
+                  href={`/painel/igreja/${slug}/agenda/${e.id}`}
+                  className="btn btn-outline"
+                >
+                  Ver inscritos
+                </a>
+              )}
               <button formAction={deleteEvent} className="btn btn-ghost text-danger">
                 <Sym name="delete" className="text-[16px]" /> Excluir
               </button>
@@ -111,6 +151,11 @@ export default async function AgendaPage({
           <input name="tag" placeholder="Tag" className="field-input" />
           <input name="sort_order" type="number" defaultValue={list.length} className="field-input" />
         </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="registration_open" className="h-4 w-4 accent-[hsl(var(--primary))]" />
+          Aceitar inscrições
+        </label>
+        <input name="capacity" type="number" min="1" placeholder="Limite de vagas (opcional)" className="field-input" />
         <button className="btn btn-primary">Adicionar</button>
       </form>
     </>
