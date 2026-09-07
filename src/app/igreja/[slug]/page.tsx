@@ -13,6 +13,7 @@ import { PrayerForm } from "./PrayerForm";
 import { SiteNav } from "./SiteNav";
 import { PWARegister } from "./PWARegister";
 import { PixBox } from "./PixBox";
+import { Sym } from "@/components/ui/primitives";
 
 export const revalidate = 60;
 
@@ -137,6 +138,39 @@ export default async function IgrejaPublicPage({
         </section>
       )}
 
+      {/* Ações rápidas — rolagem na própria página, sem trocar de tela */}
+      {(() => {
+        const acts = [
+          show("media") && toYoutubeEmbed(site.media?.youtubeEmbedUrl)
+            ? { icon: "play_circle", label: "Assistir", href: "#midia" }
+            : null,
+          show("schedule") ? { icon: "schedule", label: "Horários", href: "#horarios" } : null,
+          show("prayer") ? { icon: "volunteer_activism", label: "Pedir oração", href: "#oracao" } : null,
+          site.contact?.mapsUrl
+            ? { icon: "map", label: "Como chegar", href: site.contact.mapsUrl }
+            : show("contact")
+              ? { icon: "place", label: "Contato", href: "#contato" }
+              : null,
+          { icon: "how_to_reg", label: "Fazer parte", href: `/igreja/${slug}/entrar` },
+        ].filter(Boolean) as { icon: string; label: string; href: string }[];
+        return (
+          <nav className="border-b border-border bg-surface">
+            <div className="mx-auto flex max-w-3xl gap-2 overflow-x-auto px-4 py-3">
+              {acts.map((a) => (
+                <a
+                  key={a.label}
+                  href={a.href}
+                  className="flex shrink-0 items-center gap-1.5 rounded-[var(--radius)] border border-border bg-card px-3 py-2 text-sm hover:border-foreground"
+                >
+                  <Sym name={a.icon} className="text-[18px]" />
+                  {a.label}
+                </a>
+              ))}
+            </div>
+          </nav>
+        );
+      })()}
+
       {show("media") && toYoutubeEmbed(site.media?.youtubeEmbedUrl) && (
         <Section id="midia" {...t("media")}>
           {(site.media?.lastLiveLabel || site.media?.lastLiveDate) && (
@@ -161,16 +195,39 @@ export default async function IgrejaPublicPage({
         </Section>
       )}
 
-      {show("firstTime") && (
-        <Section id="primeira-vez" {...t("firstTime")}>
-          <a
-            href={`/igreja/${slug}/primeira-vez`}
-            className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-border px-4 py-2 text-sm hover:border-foreground"
-          >
-            Saiba o que esperar
-          </a>
-        </Section>
-      )}
+      {show("firstTime") &&
+        (() => {
+          const ft = site.first_time ?? {};
+          const expect = [
+            { icon: "schedule", label: "Duração do culto", value: ft.duration },
+            { icon: "checkroom", label: "Como se vestir", value: ft.dressCode },
+            { icon: "child_care", label: "Ministério infantil", value: ft.kids },
+            { icon: "local_parking", label: "Estacionamento", value: ft.parking },
+            { icon: "menu_book", label: "O que levar", value: ft.whatToBring },
+            { icon: "login", label: "Quando chegar", value: ft.arrival },
+          ].filter((e) => e.value?.trim());
+          return (
+            <Section
+              id="primeira-vez"
+              title={t("firstTime").title}
+              subtitle={ft.intro?.trim() || t("firstTime").subtitle}
+            >
+              {expect.length > 0 && (
+                <div className="grid gap-4 text-left sm:grid-cols-2">
+                  {expect.map((e) => (
+                    <div key={e.label} className="rounded-[var(--radius)] border border-border p-4">
+                      <Sym name={e.icon} className="text-[22px]" />
+                      <p className="mt-2 text-sm font-medium">{e.label}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                        {e.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Section>
+          );
+        })()}
 
       {show("schedule") && (
         <Section id="horarios" {...t("schedule")}>
