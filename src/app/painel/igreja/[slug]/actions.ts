@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getOrgForMember } from "@/lib/site/queries";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { SiteConfig } from "@/lib/site/schema";
 
 export async function saveSite(slug: string, patch: Partial<SiteConfig>) {
@@ -41,15 +42,15 @@ export async function uploadSiteAsset(
   const path = `${ctx.org.id}/${kind}-${Date.now()}.${ext}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
 
-  const { error } = await ctx.supabase.storage
-    .from("site-assets")
-    .upload(path, bytes, {
-      contentType: file.type || "application/octet-stream",
-      upsert: true,
-      cacheControl: "3600",
-    });
+  // Permissão já validada acima (getOrgForMember). Grava com service-role.
+  const admin = createAdminClient();
+  const { error } = await admin.storage.from("site-assets").upload(path, bytes, {
+    contentType: file.type || "application/octet-stream",
+    upsert: true,
+    cacheControl: "3600",
+  });
   if (error) return { error: error.message };
 
-  const { data } = ctx.supabase.storage.from("site-assets").getPublicUrl(path);
+  const { data } = admin.storage.from("site-assets").getPublicUrl(path);
   return { url: data.publicUrl };
 }
