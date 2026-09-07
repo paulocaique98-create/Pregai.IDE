@@ -118,16 +118,18 @@ export default async function IgrejaPublicPage({
     show("schedule") && { icon: "schedule", label: "Horários", href: "#horarios" },
     show("prayer") && { icon: "volunteer_activism", label: "Pedir oração", href: "#oracao" },
     site.contact?.mapsUrl
-      ? { icon: "map", label: "Como chegar", href: site.contact.mapsUrl }
-      : show("contact") && { icon: "place", label: "Contato", href: "#contato" },
-    { icon: "how_to_reg", label: "Fazer parte", href: `/igreja/${slug}/entrar` },
+      ? { icon: "location_on", label: "Como chegar", href: site.contact.mapsUrl }
+      : show("contact") && { icon: "location_on", label: "Contato", href: "#contato" },
+    { icon: "person", label: "Fazer parte", href: `/igreja/${slug}/entrar` },
   ].filter(Boolean) as { icon: string; label: string; href: string }[];
 
   const navBottom = [
     { icon: "home", label: "Início", href: "#top" },
-    show("schedule") && { icon: "schedule", label: "Horários", href: "#horarios" },
+    hasVideo
+      ? { icon: "play_circle", label: "Assistir", href: "#midia" }
+      : show("schedule") && { icon: "schedule", label: "Horários", href: "#horarios" },
     show("prayer") && { icon: "volunteer_activism", label: "Oração", href: "#oracao" },
-    show("giving") && { icon: "pix", label: "Contribuir", href: "#contribuir" },
+    show("giving") && { icon: "favorite", label: "Contribuir", href: "#contribuir" },
     { icon: "person", label: "Membro", href: `/igreja/${slug}/entrar` },
   ].filter(Boolean) as { icon: string; label: string; href: string }[];
 
