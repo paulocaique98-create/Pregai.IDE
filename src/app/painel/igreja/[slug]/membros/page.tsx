@@ -8,8 +8,10 @@ import {
   Badge,
   EmptyState,
 } from "@/components/ui/primitives";
-import { setMemberStatus } from "./actions";
+import { appUrl } from "@/lib/site/urls";
+import { setMemberStatus, createInvite, deleteInvite } from "./actions";
 import { RoleSelect } from "./RoleSelect";
+import { InviteLink } from "./InviteLink";
 
 type Row = {
   user_id: string;
@@ -75,6 +77,12 @@ export default async function MembrosPage({
   const active = rows.filter((r) => r.status === "active");
   const blocked = rows.filter((r) => r.status === "blocked");
 
+  const { data: invites } = await ctx.supabase
+    .from("organization_invites")
+    .select("id, token, label, auto_approve, created_at")
+    .eq("org_id", ctx.org.id)
+    .order("created_at", { ascending: false });
+
   return (
     <>
       <PageHeader
@@ -88,6 +96,50 @@ export default async function MembrosPage({
         <StatTile label="Ativos" value={active.length} icon="verified" />
         <StatTile label="Bloqueados" value={blocked.length} icon="block" />
       </div>
+
+      <section className="mb-10">
+        <SectionHeading
+          kicker="Convites"
+          title="Links de convite"
+          aside="Mande no grupo do WhatsApp"
+        />
+        <div className="space-y-2">
+          {(invites ?? []).map((inv) => (
+            <div key={inv.id} className="card flex flex-wrap items-center gap-3 p-3">
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="text-sm font-medium">
+                  {inv.label || "Convite"}
+                  {inv.auto_approve && <Badge>aprova na hora</Badge>}
+                </p>
+                <InviteLink url={`${appUrl()}/igreja/${slug}/convite/${inv.token}`} />
+              </div>
+              <form action={deleteInvite}>
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="id" value={inv.id} />
+                <button className="btn btn-ghost !px-2 !py-1 text-xs text-danger">
+                  Revogar
+                </button>
+              </form>
+            </div>
+          ))}
+        </div>
+        <form
+          action={createInvite}
+          className="mt-3 flex flex-wrap items-end gap-3 rounded-[var(--radius-lg)] border border-dashed border-border p-3"
+        >
+          <input type="hidden" name="slug" value={slug} />
+          <input
+            name="label"
+            placeholder="Nome do convite (ex: Grupo dos novos)"
+            className="field-input flex-1"
+          />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="auto_approve" className="h-4 w-4 accent-[hsl(var(--primary))]" />
+            aprovar na hora
+          </label>
+          <button className="btn btn-primary">Gerar link</button>
+        </form>
+      </section>
 
       <section className="mb-10">
         <SectionHeading kicker="Fila de aprovação" title="Aguardando aprovação" />

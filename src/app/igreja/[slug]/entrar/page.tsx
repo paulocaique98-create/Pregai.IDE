@@ -4,8 +4,11 @@ import { MemberAuthForm } from "./MemberAuthForm";
 
 export default async function MemberEntrarPage({
   params,
+  searchParams,
 }: PageProps<"/igreja/[slug]/entrar">) {
   const { slug } = await params;
+  const sp = await searchParams;
+  const next = typeof sp.next === "string" ? sp.next : undefined;
   const data = await getPublishedSite(slug);
   if (!data) notFound();
 
@@ -16,7 +19,7 @@ export default async function MemberEntrarPage({
           {data.org.name}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">Área do membro</p>
-        <MemberAuthForm slug={slug} />
+        <MemberAuthForm slug={slug} next={next} />
       </div>
     </main>
   );

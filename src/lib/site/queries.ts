@@ -22,7 +22,7 @@ export const getOrgForMember = cache(async (slug: string) => {
     .maybeSingle();
   if (!membership) return null;
 
-  return { org, role: membership.role as string, supabase };
+  return { org, role: membership.role as string, supabase, user };
 });
 
 const STAFF = ["owner", "pastor", "secretaria", "lider"];

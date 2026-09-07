@@ -7,20 +7,23 @@ import { memberSignIn, memberSignUp } from "./actions";
 const input =
   "w-full rounded-[var(--radius)] border border-border bg-card px-3 py-2 text-sm";
 
-export function MemberAuthForm({ slug }: { slug: string }) {
+export function MemberAuthForm({ slug, next }: { slug: string; next?: string }) {
   const [mode, setMode] = useState<"in" | "up">("up");
-  const action = (mode === "in" ? memberSignIn : memberSignUp).bind(null, slug);
+  const action = (mode === "in" ? memberSignIn : memberSignUp).bind(null, slug, next ?? null);
   const [state, formAction, pending] = useActionState(
     action,
     null as { error?: string } | null,
   );
 
   async function google() {
+    // marca a intenção de entrar nesta igreja (vínculo deliberado)
+    document.cookie = `pregai_join_intent=${slug}; path=/; max-age=600; samesite=lax`;
     const supabase = createClient();
+    const dest = next && next.startsWith(`/igreja/${slug}/`) ? next : `/igreja/${slug}/membro`;
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/igreja/${slug}/membro`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(dest)}`,
       },
     });
   }
