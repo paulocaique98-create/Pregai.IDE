@@ -84,12 +84,25 @@ export default async function IgrejaPublicPage({
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Church",
-    name: org.name,
+    "@type": ["Church", "PlaceOfWorship"],
+    name: site.branding?.name || org.name,
     url: `/igreja/${slug}`,
-    address: site.contact?.address,
-    telephone: site.contact?.whatsapp,
-    email: site.contact?.email,
+    ...(site.hero?.coverImageUrl || site.branding?.logoUrl
+      ? { image: site.branding?.logoUrl || site.hero?.coverImageUrl }
+      : {}),
+    ...(site.contact?.address
+      ? { address: { "@type": "PostalAddress", streetAddress: site.contact.address } }
+      : {}),
+    ...(site.contact?.whatsapp ? { telephone: site.contact.whatsapp } : {}),
+    ...(site.contact?.email ? { email: site.contact.email } : {}),
+    ...((site.schedule ?? []).length
+      ? { openingHours: (site.schedule ?? []).map((s) => `${s.label} ${s.time}`) }
+      : {}),
+    sameAs: [
+      site.social_links?.instagram,
+      site.social_links?.youtube,
+      site.social_links?.facebook,
+    ].filter(Boolean),
   };
 
   const pixCode = site.giving?.pixKey

@@ -21,8 +21,8 @@ export default async function MinisteriosPage({
     <>
       <PageHeader
         kicker="Vida da igreja"
-        title="Ministérios"
-        description="O que a igreja oferece durante a semana. Aparece na seção “Há um lugar para você aqui” do site."
+        title="Ministérios do site"
+        description="Lista de vitrine do site público (“Há um lugar para você aqui”). Para equipes que a pessoa participa e o líder gerencia, use Departamentos."
       />
 
       {list.length === 0 && (
