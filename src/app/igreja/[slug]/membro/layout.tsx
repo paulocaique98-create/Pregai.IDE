@@ -51,22 +51,14 @@ export default async function MembroLayout({
 
   return (
     <div className="min-h-full pb-20">
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur">
+      <header className="sticky top-0 z-30 flex h-14 items-center border-b border-border bg-background/95 px-4 backdrop-blur">
         <Link
           href={`/igreja/${slug}/membro`}
           className="flex items-center gap-2 font-[family-name:var(--font-display)] text-base font-semibold tracking-tight"
         >
           <Sym name="church" className="text-[20px]" />
-          <span className="max-w-[12rem] truncate">{name}</span>
+          <span className="max-w-[14rem] truncate">{name}</span>
         </Link>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <Link href={`/igreja/${slug}`} target="_blank" aria-label="Ver site">
-            <Sym name="open_in_new" className="text-[20px]" />
-          </Link>
-          <form action={signOut}>
-            <button className="text-sm">Sair</button>
-          </form>
-        </div>
       </header>
 
       <div className="mx-auto max-w-2xl px-4 py-6">{children}</div>
