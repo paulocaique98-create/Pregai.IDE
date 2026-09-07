@@ -2,7 +2,7 @@ import { getMemberContext } from "@/lib/site/member";
 import { getDailyDevotional } from "@/lib/verse";
 import { Sym } from "@/components/ui/primitives";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 export default async function MembroDevocional({
   params,

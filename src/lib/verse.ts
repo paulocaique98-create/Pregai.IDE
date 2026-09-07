@@ -39,7 +39,7 @@ export const getDailyDevotional = cache(async (): Promise<DailyDevotional | null
   try {
     const res = await fetch(DEVO_SOURCE, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; PregaiBot/1.0)" },
-      next: { revalidate: 3600 },
+      next: { revalidate: 600 },
     });
     if (!res.ok) return null;
     const html = await res.text();
@@ -72,12 +72,12 @@ export const getDailyDevotional = cache(async (): Promise<DailyDevotional | null
   }
 });
 
-/** Versículo do dia (BíbliaOn). Revalida de hora em hora; a fonte atualiza 1x/dia. */
+/** Versículo do dia (BíbliaOn). Revalida a cada 10 min; a fonte atualiza 1x/dia. */
 export const getDailyVerse = cache(async (): Promise<DailyVerse | null> => {
   try {
     const res = await fetch(SOURCE, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; PregaiBot/1.0)" },
-      next: { revalidate: 3600 },
+      next: { revalidate: 600 },
     });
     if (!res.ok) return null;
     const html = await res.text();
