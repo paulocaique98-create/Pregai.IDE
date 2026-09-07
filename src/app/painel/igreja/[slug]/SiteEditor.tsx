@@ -8,6 +8,7 @@ import {
   type SiteConfig,
 } from "@/lib/site/schema";
 import { Sym, Kicker } from "@/components/ui/primitives";
+import { ImageUpload } from "./ImageUpload";
 import { saveSite, setPublished } from "./actions";
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -33,10 +34,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export function SiteEditor({
   slug,
+  orgId,
   initial,
 }: {
   slug: string;
-  orgName?: string;
+  orgId: string;
   initial: SiteConfig;
 }) {
   const [cfg, setCfg] = useState<SiteConfig>(initial);
@@ -108,24 +110,24 @@ export function SiteEditor({
               onChange={(e) => patch({ branding: { ...cfg.branding, name: e.target.value } })}
             />
           </Field>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Cor principal">
-              <input
-                type="color"
-                className="h-10 w-full rounded-[var(--radius)] border border-border bg-card"
-                value={cfg.branding.primaryColor ?? "#111111"}
-                onChange={(e) =>
-                  patch({ branding: { ...cfg.branding, primaryColor: e.target.value } })
-                }
-              />
-            </Field>
-            <Field label="URL do logo">
-              <input
-                className="field-input"
-                value={cfg.branding.logoUrl ?? ""}
-                onChange={(e) => patch({ branding: { ...cfg.branding, logoUrl: e.target.value } })}
-              />
-            </Field>
+          <Field label="Cor principal">
+            <input
+              type="color"
+              className="h-10 w-16 rounded-[var(--radius)] border border-border bg-card"
+              value={cfg.branding.primaryColor ?? "#111111"}
+              onChange={(e) =>
+                patch({ branding: { ...cfg.branding, primaryColor: e.target.value } })
+              }
+            />
+          </Field>
+          <div>
+            <span className="field-label">Logo</span>
+            <ImageUpload
+              orgId={orgId}
+              kind="logo"
+              value={cfg.branding.logoUrl}
+              onChange={(url) => patch({ branding: { ...cfg.branding, logoUrl: url } })}
+            />
           </div>
         </Card>
 
@@ -152,13 +154,16 @@ export function SiteEditor({
               onChange={(e) => patch({ hero: { ...cfg.hero, subtitle: e.target.value } })}
             />
           </Field>
-          <Field label="Imagem de capa (URL)">
-            <input
-              className="field-input"
-              value={cfg.hero.coverImageUrl ?? ""}
-              onChange={(e) => patch({ hero: { ...cfg.hero, coverImageUrl: e.target.value } })}
+          <div>
+            <span className="field-label">Imagem de capa</span>
+            <ImageUpload
+              orgId={orgId}
+              kind="cover"
+              aspect="wide"
+              value={cfg.hero.coverImageUrl}
+              onChange={(url) => patch({ hero: { ...cfg.hero, coverImageUrl: url } })}
             />
-          </Field>
+          </div>
         </Card>
 
         <Card

@@ -12,5 +12,5 @@ export default async function SitePainelPage({
   const site = await getSiteConfig(ctx.org.id);
   if (!site) notFound();
 
-  return <SiteEditor slug={slug} orgName={ctx.org.name} initial={site} />;
+  return <SiteEditor slug={slug} orgId={ctx.org.id} initial={site} />;
 }
