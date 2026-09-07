@@ -176,7 +176,7 @@ export function Shell({
         </div>
       )}
 
-      <div className="mx-auto max-w-5xl px-3 pb-24 pt-6 sm:px-4 md:px-8 md:pb-10">
+      <div className="mx-auto max-w-5xl overflow-x-hidden px-3 pb-24 pt-6 sm:px-4 md:px-8 md:pb-10">
         {children}
       </div>
 

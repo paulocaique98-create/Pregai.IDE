@@ -120,7 +120,7 @@ export default async function MembrosPage({
                 </form>
               </div>
               <div className="mt-2">
-                <InviteLink url={`${appUrl()}/igreja/${slug}/convite/${inv.token}`} />
+                <InviteLink url={`${appUrl()}/c/${inv.token}`} />
               </div>
             </div>
           ))}
