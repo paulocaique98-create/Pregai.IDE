@@ -22,8 +22,17 @@ export default async function MinisteriosPage({
       <PageHeader
         kicker="Vida da igreja"
         title="Ministérios do site"
-        description="Lista de vitrine do site público (“Há um lugar para você aqui”). Para equipes que a pessoa participa e o líder gerencia, use Departamentos."
+        description="Só texto de vitrine: o que aparece na seção “Há um lugar para você aqui” do site público, para o visitante conhecer a igreja."
       />
+
+      <div className="card mb-6 flex gap-3 p-4 text-sm text-muted-foreground">
+        <Sym name="info" className="shrink-0 text-[18px]" />
+        <p>
+          Isto é <b>conteúdo do site</b>, não gestão de equipe. Para times que
+          o membro participa, o líder aprova e monta escala, use a aba{" "}
+          <b>Departamentos</b>.
+        </p>
+      </div>
 
       {list.length === 0 && (
         <div className="mb-6">

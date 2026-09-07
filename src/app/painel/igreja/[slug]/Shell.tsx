@@ -6,19 +6,19 @@ import { usePathname } from "next/navigation";
 import { Sym } from "@/components/ui/primitives";
 
 const STAFF_NAV = [
-  { seg: "", label: "Site", icon: "home", exact: true },
-  { seg: "avisos", label: "Avisos", icon: "campaign" },
-  { seg: "agenda", label: "Agenda", icon: "calendar_month" },
-  { seg: "departamentos", label: "Deptos", icon: "workspaces" },
-  { seg: "oracoes", label: "Oração", icon: "volunteer_activism" },
-  { seg: "membros", label: "Membros", icon: "group" },
+  { seg: "", label: "Início", short: "Início", icon: "home", exact: true },
+  { seg: "avisos", label: "Avisos", short: "Avisos", icon: "campaign" },
+  { seg: "agenda", label: "Agenda", short: "Agenda", icon: "calendar_month" },
+  { seg: "departamentos", label: "Departamentos", short: "Deptos", icon: "workspaces" },
+  { seg: "oracoes", label: "Oração", short: "Oração", icon: "volunteer_activism" },
+  { seg: "membros", label: "Membros", short: "Membros", icon: "group" },
 ];
 const STAFF_MORE = [
   { seg: "ministerios", label: "Ministérios do site", icon: "diversity_3" },
   { seg: "visitantes", label: "Visitantes", icon: "waving_hand" },
 ];
 const LEADER_NAV = [
-  { seg: "departamentos", label: "Meus departamentos", icon: "workspaces" },
+  { seg: "departamentos", label: "Meus departamentos", short: "Deptos", icon: "workspaces" },
 ];
 
 export function Shell({
@@ -197,12 +197,14 @@ export function Shell({
             <Link
               key={n.seg || "home"}
               href={href(n.seg)}
-              className={`flex flex-col items-center gap-0.5 py-2 text-[0.65rem] ${
+              className={`flex min-w-0 flex-col items-center gap-0.5 px-1 py-2 text-center text-[0.62rem] leading-tight ${
                 active ? "text-foreground" : "text-muted-foreground"
               }`}
             >
               <Sym name={n.icon} className="text-[22px]" />
-              {n.label}
+              <span className="w-full truncate">
+                {(n as { short?: string }).short ?? n.label}
+              </span>
             </Link>
           );
         })}

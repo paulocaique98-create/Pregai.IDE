@@ -75,28 +75,30 @@ export default async function VisitantesPage({
                   )}
                   <form
                     action={setVisitorStatus}
-                    className="mt-3 inline-flex overflow-hidden rounded-[var(--radius)] border border-border"
+                    className="mt-3 flex flex-wrap items-center gap-2"
                   >
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="id" value={v.id} />
-                    {FLOW.map((s) => (
-                      <button
-                        key={s.key}
-                        name="status"
-                        value={s.key}
-                        className={`px-3 py-1.5 text-xs font-medium ${
-                          v.status === s.key
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:bg-surface"
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
+                    <span className="flex flex-1 overflow-hidden rounded-[var(--radius)] border border-border">
+                      {FLOW.map((s) => (
+                        <button
+                          key={s.key}
+                          name="status"
+                          value={s.key}
+                          className={`flex-1 px-2 py-1.5 text-xs font-medium ${
+                            v.status === s.key
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:bg-surface"
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </span>
                     <button
                       name="status"
                       value="arquivado"
-                      className="px-3 py-1.5 text-xs text-muted-foreground hover:bg-surface"
+                      className="shrink-0 rounded-[var(--radius)] px-2 py-1.5 text-xs text-muted-foreground hover:bg-surface"
                     >
                       Arquivar
                     </button>

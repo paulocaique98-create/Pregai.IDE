@@ -85,7 +85,7 @@ export default async function OracoesPage({
                   </p>
                   <form
                     action={setPrayerStatus}
-                    className="mt-3 inline-flex overflow-hidden rounded-[var(--radius)] border border-border"
+                    className="mt-3 flex overflow-hidden rounded-[var(--radius)] border border-border"
                   >
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="id" value={r.id} />
@@ -94,7 +94,7 @@ export default async function OracoesPage({
                         key={s.key}
                         name="status"
                         value={s.key}
-                        className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                        className={`flex-1 px-2 py-1.5 text-xs font-medium transition-colors ${
                           r.status === s.key
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:bg-surface"

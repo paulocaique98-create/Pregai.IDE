@@ -65,19 +65,25 @@ export default async function EscalasPage({
 
       <form
         action={createSchedule}
-        className="mt-5 flex flex-wrap items-end gap-3 rounded-[var(--radius-lg)] border border-dashed border-border p-4"
+        className="mt-5 space-y-3 rounded-[var(--radius-lg)] border border-dashed border-border p-4"
       >
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="dept_id" value={deptId} />
-        <label className="text-xs text-muted-foreground">
-          Data
-          <input name="service_date" type="date" required className="field-input mt-1" />
-        </label>
-        <label className="flex-1 text-xs text-muted-foreground">
-          Título
-          <input name="title" placeholder="Culto de domingo — noite" className="field-input mt-1" />
-        </label>
-        <button className="btn btn-primary">Nova escala</button>
+        <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
+          <label className="block text-xs text-muted-foreground">
+            Data
+            <input name="service_date" type="date" required className="field-input mt-1 w-full" />
+          </label>
+          <label className="block text-xs text-muted-foreground">
+            Título
+            <input
+              name="title"
+              placeholder="Culto de domingo — noite"
+              className="field-input mt-1 w-full"
+            />
+          </label>
+        </div>
+        <button className="btn btn-primary w-full sm:w-auto">Nova escala</button>
       </form>
 
       {upcoming.length === 0 && past.length === 0 && (

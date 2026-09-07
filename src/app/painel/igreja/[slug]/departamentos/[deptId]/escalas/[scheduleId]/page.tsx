@@ -148,23 +148,23 @@ export default async function ScheduleDetail({
 
       <form
         action={addAssignment}
-        className="mt-4 flex flex-wrap items-end gap-3 rounded-[var(--radius-lg)] border border-dashed border-border p-4"
+        className="mt-4 space-y-3 rounded-[var(--radius-lg)] border border-dashed border-border p-4"
       >
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="dept_id" value={deptId} />
         <input type="hidden" name="schedule_id" value={scheduleId} />
-        <label className="flex-1 text-xs text-muted-foreground">
+        <label className="block text-xs text-muted-foreground">
           Função
           <input
             name="role"
             required
-            placeholder="Ex: Vocal, Guitarra, Mesa de som, Recepção"
-            className="field-input mt-1"
+            placeholder="Ex: Vocal, Mesa de som, Recepção"
+            className="field-input mt-1 w-full"
           />
         </label>
-        <label className="text-xs text-muted-foreground">
+        <label className="block text-xs text-muted-foreground">
           Voluntário (opcional)
-          <select name="user_id" className="field-input mt-1">
+          <select name="user_id" className="field-input mt-1 w-full">
             <option value="">— deixar vaga aberta</option>
             {people.map((p) => (
               <option key={p.user_id} value={p.user_id}>
@@ -173,7 +173,7 @@ export default async function ScheduleDetail({
             ))}
           </select>
         </label>
-        <button className="btn btn-primary">Adicionar função</button>
+        <button className="btn btn-primary w-full sm:w-auto">Adicionar função</button>
       </form>
     </>
   );

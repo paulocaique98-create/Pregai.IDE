@@ -81,18 +81,20 @@ export function StatTile({
   progress?: number;
 }) {
   return (
-    <div className="card p-4">
-      <div className="flex items-center justify-between">
-        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+    <div className="card min-w-0 p-3 sm:p-4">
+      <div className="flex items-start justify-between gap-1.5">
+        <span className="min-w-0 text-[0.625rem] font-medium uppercase leading-tight tracking-wide text-muted-foreground sm:text-[0.6875rem]">
           {label}
         </span>
-        {icon && <Sym name={icon} className="text-[18px] text-muted-foreground" />}
+        {icon && (
+          <Sym name={icon} className="shrink-0 text-[16px] text-muted-foreground sm:text-[18px]" />
+        )}
       </div>
-      <div className="mt-3 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold tabular-nums tracking-tight">
+      <div className="mt-2 flex items-baseline gap-1.5 sm:mt-3">
+        <span className="text-xl font-semibold tabular-nums tracking-tight sm:text-2xl">
           {value}
         </span>
-        {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+        {hint && <span className="truncate text-xs text-muted-foreground">{hint}</span>}
       </div>
       {typeof progress === "number" && (
         <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted">

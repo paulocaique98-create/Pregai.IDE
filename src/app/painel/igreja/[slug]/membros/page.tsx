@@ -105,39 +105,43 @@ export default async function MembrosPage({
         />
         <div className="space-y-2">
           {(invites ?? []).map((inv) => (
-            <div key={inv.id} className="card flex flex-wrap items-center gap-3 p-3">
-              <div className="min-w-0 flex-1 space-y-1">
-                <p className="text-sm font-medium">
-                  {inv.label || "Convite"}
+            <div key={inv.id} className="card min-w-0 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="flex min-w-0 flex-wrap items-center gap-1.5 text-sm font-medium">
+                  <span className="truncate">{inv.label || "Convite"}</span>
                   {inv.auto_approve && <Badge>aprova na hora</Badge>}
                 </p>
+                <form action={deleteInvite} className="shrink-0">
+                  <input type="hidden" name="slug" value={slug} />
+                  <input type="hidden" name="id" value={inv.id} />
+                  <button className="btn btn-ghost !px-2 !py-1 text-xs text-danger">
+                    Revogar
+                  </button>
+                </form>
+              </div>
+              <div className="mt-2">
                 <InviteLink url={`${appUrl()}/igreja/${slug}/convite/${inv.token}`} />
               </div>
-              <form action={deleteInvite}>
-                <input type="hidden" name="slug" value={slug} />
-                <input type="hidden" name="id" value={inv.id} />
-                <button className="btn btn-ghost !px-2 !py-1 text-xs text-danger">
-                  Revogar
-                </button>
-              </form>
             </div>
           ))}
         </div>
         <form
           action={createInvite}
-          className="mt-3 flex flex-wrap items-end gap-3 rounded-[var(--radius-lg)] border border-dashed border-border p-3"
+          className="mt-3 space-y-3 rounded-[var(--radius-lg)] border border-dashed border-border p-3"
         >
           <input type="hidden" name="slug" value={slug} />
           <input
             name="label"
             placeholder="Nome do convite (ex: Grupo dos novos)"
-            className="field-input flex-1"
+            className="field-input w-full"
           />
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="auto_approve" className="h-4 w-4 accent-[hsl(var(--primary))]" />
-            aprovar na hora
-          </label>
-          <button className="btn btn-primary">Gerar link</button>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="auto_approve" className="h-4 w-4 accent-[hsl(var(--primary))]" />
+              aprovar na hora
+            </label>
+            <button className="btn btn-primary">Gerar link</button>
+          </div>
         </form>
       </section>
 
