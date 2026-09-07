@@ -4,6 +4,7 @@ import { getMemberContext } from "@/lib/site/member";
 import { toYoutubeEmbed, formatEventDate } from "@/lib/site/schema";
 import { Sym, EmptyState } from "@/components/ui/primitives";
 import { DailyVerse, DailyVerseSkeleton } from "./DailyVerse";
+import { EscalaActions } from "./EscalaCard";
 
 export default async function MembroInicio({
   params,
@@ -35,6 +36,14 @@ export default async function MembroInicio({
       .limit(4),
   ]);
 
+  const { data: myAssigns } = await ctx.supabase
+    .from("serving_assignments")
+    .select("id, role, status, token, service_date, serving_schedules(title)")
+    .eq("user_id", ctx.user.id)
+    .gte("service_date", new Date().toISOString().slice(0, 10))
+    .order("service_date", { ascending: true })
+    .limit(3);
+
   const firstName = (ctx.profile?.full_name || "").split(" ")[0];
   const video = toYoutubeEmbed(ctx.site.media?.youtubeEmbedUrl);
   const active = (myDepts ?? []).filter((d) => d.status === "active").length;
@@ -49,6 +58,40 @@ export default async function MembroInicio({
           Acompanhe a vida da igreja durante a semana.
         </p>
       </div>
+
+      {/* Minha escala */}
+      {(myAssigns ?? []).length > 0 && (
+        <section>
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
+              <Sym name="event_note" className="text-[20px]" /> Sua escala
+            </h2>
+            <Link href={`/igreja/${slug}/membro/escala`} className="text-xs text-muted-foreground underline">
+              ver tudo
+            </Link>
+          </div>
+          <ul className="space-y-2">
+            {(myAssigns ?? []).map((a) => (
+              <li key={a.id} className="card p-4">
+                <p className="text-sm font-semibold">
+                  {(a as { serving_schedules?: { title?: string } }).serving_schedules?.title}
+                </p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  {new Date(a.service_date + "T12:00").toLocaleDateString("pt-BR", {
+                    weekday: "short",
+                    day: "2-digit",
+                    month: "short",
+                  })}{" "}
+                  · {a.role}
+                </p>
+                <div className="mt-3">
+                  <EscalaActions slug={slug} token={a.token} status={a.status} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Avisos */}
       {(notices ?? []).length > 0 && (

@@ -112,6 +112,18 @@ export default async function DepartamentoPage({
       </Link>
       <PageHeader kicker="Departamento" title={dept.name} description={dept.description ?? undefined} />
 
+      <Link
+        href={`/painel/igreja/${slug}/departamentos/${deptId}/escalas`}
+        className="card mb-6 flex items-center gap-3 p-4 transition-colors hover:border-border-strong"
+      >
+        <Sym name="event_note" className="text-[22px]" />
+        <div className="flex-1">
+          <p className="text-sm font-medium">Escalas ministeriais</p>
+          <p className="text-xs text-muted-foreground">Montar escala, escalar voluntários, ver confirmações</p>
+        </div>
+        <Sym name="chevron_right" className="text-muted-foreground" />
+      </Link>
+
       <form action={updateDepartment} className="card mb-8 space-y-3 p-4 sm:p-5">
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="dept_id" value={deptId} />
