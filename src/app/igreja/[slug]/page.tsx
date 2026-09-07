@@ -12,6 +12,7 @@ import QRCode from "qrcode";
 import { pixPayload } from "@/lib/site/pix";
 import { brandStyle } from "@/lib/site/color";
 import { PrayerForm } from "./PrayerForm";
+import { VisitForm } from "./VisitForm";
 import { SiteNav } from "./SiteNav";
 import { PWARegister } from "./PWARegister";
 import { PixBox } from "./PixBox";
@@ -241,6 +242,12 @@ export default async function IgrejaPublicPage({
                   ))}
                 </div>
               )}
+              <div className="mt-8 border-t border-border pt-8">
+                <p className="mb-4 text-sm font-medium">
+                  Quer nos avisar que vai visitar? A recepção te espera.
+                </p>
+                <VisitForm slug={slug} />
+              </div>
             </Section>
           );
         })()}
