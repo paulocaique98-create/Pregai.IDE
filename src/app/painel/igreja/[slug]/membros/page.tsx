@@ -9,6 +9,7 @@ import {
   EmptyState,
 } from "@/components/ui/primitives";
 import { setMemberStatus } from "./actions";
+import { RoleSelect } from "./RoleSelect";
 
 type Row = {
   user_id: string;
@@ -136,7 +137,13 @@ export default async function MembrosPage({
                   {r.profile?.phone || "—"}
                 </p>
               </div>
-              <Badge tone={r.role === "owner" ? "solid" : "outline"}>{r.role}</Badge>
+              {r.role === "owner" ? (
+                <Badge tone="solid">owner</Badge>
+              ) : r.status === "active" ? (
+                <RoleSelect slug={slug} userId={r.user_id} role={r.role} />
+              ) : (
+                <Badge tone="outline">{r.role}</Badge>
+              )}
               {r.status === "blocked" && <Badge>bloqueado</Badge>}
               <div className="flex gap-2">
                 {r.status === "active" && r.role !== "owner" && (
