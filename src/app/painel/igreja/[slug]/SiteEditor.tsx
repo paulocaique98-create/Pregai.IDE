@@ -20,8 +20,7 @@ function Card({
   hint?: string;
   children: React.ReactNode;
 }) {
-  // Mobile/tablet: cada seção começa fechada (só título + para que serve) e
-  // expande ao toque. Desktop (md+): sempre aberta.
+  // Toda seção começa fechada (só título + para que serve). Abre ao clicar.
   const [open, setOpen] = useState(false);
   return (
     <section className="card p-4 sm:p-5">
@@ -29,7 +28,7 @@ function Card({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-start gap-3 text-left md:pointer-events-none"
+        className="flex w-full items-start gap-3 text-left"
       >
         <div className="min-w-0 flex-1">
           <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight">
@@ -39,12 +38,12 @@ function Card({
         </div>
         <Sym
           name="expand_more"
-          className={`shrink-0 text-[20px] text-muted-foreground transition-transform md:hidden ${
+          className={`shrink-0 text-[20px] text-muted-foreground transition-transform ${
             open ? "rotate-180" : ""
           }`}
         />
       </button>
-      <div className={`mt-4 space-y-3 ${open ? "" : "hidden md:block"}`}>{children}</div>
+      {open && <div className="mt-4 space-y-3">{children}</div>}
     </section>
   );
 }
