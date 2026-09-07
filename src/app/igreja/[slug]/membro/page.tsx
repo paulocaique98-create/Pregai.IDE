@@ -1,185 +1,139 @@
 import Link from "next/link";
-import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getPublishedSite } from "@/lib/site/queries";
-import { isPlatformAdmin } from "@/lib/platform";
-import { signOut } from "@/app/entrar/actions";
-import { Badge, Sym } from "@/components/ui/primitives";
-import { joinDepartment, leaveDepartment } from "./actions";
+import { getMemberContext } from "@/lib/site/member";
+import { toYoutubeEmbed } from "@/lib/site/schema";
+import { Sym, EmptyState } from "@/components/ui/primitives";
 
-const STAFF = ["owner", "pastor", "secretaria", "lider"];
-
-export default async function MembroPage({
+export default async function MembroInicio({
   params,
 }: PageProps<"/igreja/[slug]/membro">) {
   const { slug } = await params;
-  const data = await getPublishedSite(slug);
-  if (!data) notFound();
+  const ctx = await getMemberContext(slug);
 
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect(`/igreja/${slug}/entrar`);
-  const uid = auth.user.id;
+  const [{ data: events }, { data: myDepts }] = await Promise.all([
+    ctx.supabase
+      .from("site_events")
+      .select("id, title, event_date, event_time, tag")
+      .eq("org_id", ctx.org.id)
+      .order("sort_order")
+      .limit(3),
+    ctx.supabase
+      .from("department_members")
+      .select("status, departments(name)")
+      .eq("org_id", ctx.org.id)
+      .eq("user_id", ctx.user.id),
+  ]);
 
-  // Equipe / super-admin não fica na área do membro
-  if (isPlatformAdmin(auth.user.email)) redirect("/admin");
-  const { data: myRole } = await supabase
-    .from("organization_members")
-    .select("role, status")
-    .eq("org_id", data.org.id)
-    .eq("user_id", uid)
-    .maybeSingle();
-  if (myRole?.status === "active" && STAFF.includes(myRole.role)) {
-    redirect(`/painel/igreja/${slug}`);
-  }
-  const { count: leadCount } = await supabase
-    .from("department_members")
-    .select("department_id", { count: "exact", head: true })
-    .eq("org_id", data.org.id)
-    .eq("user_id", uid)
-    .eq("role", "leader")
-    .eq("status", "active");
-  if ((leadCount ?? 0) > 0) redirect(`/painel/igreja/${slug}/departamentos`);
-
-  const { data: status } = await supabase.rpc("join_organization", { p_slug: slug });
-
-  let departments: { id: string; name: string; description: string | null }[] = [];
-  let mine: Record<string, { role: string; status: string }> = {};
-  let leadsAny = false;
-
-  if (status === "active") {
-    const [{ data: depts }, { data: dm }] = await Promise.all([
-      supabase
-        .from("departments")
-        .select("id, name, description")
-        .eq("org_id", data.org.id)
-        .eq("is_active", true)
-        .order("name"),
-      supabase
-        .from("department_members")
-        .select("department_id, role, status")
-        .eq("org_id", data.org.id)
-        .eq("user_id", uid),
-    ]);
-    departments = depts ?? [];
-    mine = Object.fromEntries(
-      (dm ?? []).map((m) => [m.department_id, { role: m.role, status: m.status }]),
-    );
-    leadsAny = (dm ?? []).some((m) => m.role === "leader" && m.status === "active");
-  }
+  const firstName = (ctx.profile?.full_name || "").split(" ")[0];
+  const video = toYoutubeEmbed(ctx.site.media?.youtubeEmbedUrl);
+  const active = (myDepts ?? []).filter((d) => d.status === "active").length;
 
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
-          {data.org.name}
+    <div className="space-y-8">
+      <div>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight">
+          Olá{firstName ? `, ${firstName}` : ""}
         </h1>
-        <form action={signOut}>
-          <button className="btn btn-ghost text-xs">Sair</button>
-        </form>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Acompanhe a vida da igreja durante a semana.
+        </p>
       </div>
 
-      {status === "pending" && (
-        <div className="card mt-8 p-6">
-          <p className="font-medium">Cadastro recebido!</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sua solicitação para ser membro está aguardando aprovação da equipe da
-            igreja. Você será avisado quando for liberada.
-          </p>
+      {/* Avisos — a desenvolver */}
+      <section>
+        <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
+          <Sym name="campaign" className="text-[20px]" /> Avisos
+        </h2>
+        <EmptyState icon="notifications">
+          Os avisos da igreja aparecerão aqui.
+        </EmptyState>
+      </section>
+
+      {/* Próximos eventos — dados reais */}
+      <section>
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
+            <Sym name="calendar_month" className="text-[20px]" /> Próximos eventos
+          </h2>
+          <Link href={`/igreja/${slug}/membro/agenda`} className="text-xs text-muted-foreground underline">
+            ver tudo
+          </Link>
         </div>
-      )}
+        {(events ?? []).length === 0 ? (
+          <EmptyState icon="event_busy">Nenhum evento agendado.</EmptyState>
+        ) : (
+          <ul className="card divide-y divide-border">
+            {(events ?? []).map((e) => (
+              <li key={e.id} className="flex items-center gap-3 p-3">
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{e.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {[e.event_date, e.event_time].filter(Boolean).join(" · ") || "Data a confirmar"}
+                  </p>
+                </div>
+                {e.tag && (
+                  <span className="rounded-[var(--radius)] bg-muted px-2 py-0.5 text-[0.65rem] uppercase text-muted-foreground">
+                    {e.tag}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-      {status === "blocked" && (
-        <p className="mt-8 text-sm text-danger">Seu acesso está bloqueado.</p>
-      )}
-
-      {status === "active" && (
-        <div className="mt-8 space-y-6">
-          <p className="text-sm text-muted-foreground">Bem-vindo(a) à área do membro.</p>
-
-          {leadsAny && (
-            <Link
-              href={`/painel/igreja/${slug}/departamentos`}
-              className="card flex items-center gap-3 p-4 transition-colors hover:border-border-strong"
-            >
-              <Sym name="workspaces" className="text-[22px]" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Gerenciar meu departamento</p>
-                <p className="text-xs text-muted-foreground">
-                  Você é líder de um departamento
-                </p>
-              </div>
-              <Sym name="chevron_right" className="text-muted-foreground" />
-            </Link>
+      {/* Última mensagem — dados reais */}
+      {video && (
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
+            <Sym name="play_circle" className="text-[20px]" /> Última mensagem
+          </h2>
+          {ctx.site.media?.lastLiveLabel && (
+            <p className="mb-2 text-sm font-medium">{ctx.site.media.lastLiveLabel}</p>
           )}
-
-          <section>
-            <h2 className="mb-3 font-[family-name:var(--font-display)] text-lg font-semibold">
-              Departamentos
-            </h2>
-            {departments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                A igreja ainda não cadastrou departamentos.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {departments.map((d) => {
-                  const m = mine[d.id];
-                  return (
-                    <li key={d.id} className="card p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-medium">{d.name}</p>
-                          {d.description && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              {d.description}
-                            </p>
-                          )}
-                        </div>
-                        {m?.role === "leader" && m.status === "active" && (
-                          <Badge tone="solid">líder</Badge>
-                        )}
-                      </div>
-                      <div className="mt-3">
-                        {!m && (
-                          <form action={joinDepartment.bind(null, slug)}>
-                            <input type="hidden" name="dept_id" value={d.id} />
-                            <button className="btn btn-outline !px-3 !py-1.5 text-xs">
-                              Participar
-                            </button>
-                          </form>
-                        )}
-                        {m?.status === "pending" && (
-                          <span className="text-xs text-muted-foreground">
-                            Solicitação enviada — aguardando o líder aprovar
-                          </span>
-                        )}
-                        {m?.status === "active" && (
-                          <form action={leaveDepartment.bind(null, slug)}>
-                            <input type="hidden" name="dept_id" value={d.id} />
-                            <span className="mr-2 text-xs text-muted-foreground">
-                              Você participa deste departamento.
-                            </span>
-                            <button className="btn btn-ghost !px-2 !py-1 text-xs text-danger">
-                              Sair
-                            </button>
-                          </form>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-        </div>
+          <div className="aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] border border-border">
+            <iframe src={video} className="h-full w-full" allowFullScreen title="Mensagem" />
+          </div>
+        </section>
       )}
 
-      <p className="mt-10 text-sm">
-        <Link href={`/igreja/${slug}`} className="text-muted-foreground underline">
-          ← Voltar ao site da igreja
+      {/* Servir */}
+      <section>
+        <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
+          <Sym name="workspaces" className="text-[20px]" /> Onde você serve
+        </h2>
+        <Link
+          href={`/igreja/${slug}/membro/departamentos`}
+          className="card flex items-center gap-3 p-4 transition-colors hover:border-border-strong"
+        >
+          <div className="flex-1">
+            <p className="text-sm font-medium">
+              {active > 0
+                ? `Você participa de ${active} departamento${active > 1 ? "s" : ""}`
+                : "Encontre um lugar para servir"}
+            </p>
+            <p className="text-xs text-muted-foreground">Ver departamentos da igreja</p>
+          </div>
+          <Sym name="chevron_right" className="text-muted-foreground" />
         </Link>
-      </p>
-    </main>
+      </section>
+
+      {/* A desenvolver */}
+      <section className="grid gap-3 sm:grid-cols-2">
+        {[
+          { icon: "checklist", label: "Minha escala", hint: "em breve" },
+          { icon: "auto_stories", label: "Devocional diário", hint: "em breve" },
+          { icon: "bookmark", label: "Conteúdos salvos", hint: "em breve" },
+          { icon: "groups", label: "Meu grupo / célula", hint: "em breve" },
+        ].map((c) => (
+          <div key={c.label} className="card flex items-center gap-3 p-4 opacity-60">
+            <Sym name={c.icon} className="text-[20px]" />
+            <div>
+              <p className="text-sm font-medium">{c.label}</p>
+              <p className="text-xs text-muted-foreground">{c.hint}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+    </div>
   );
 }
