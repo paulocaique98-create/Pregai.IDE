@@ -19,7 +19,7 @@ export default async function MembroInicio({
       .limit(3),
     ctx.supabase
       .from("department_members")
-      .select("status, departments(name)")
+      .select("status")
       .eq("org_id", ctx.org.id)
       .eq("user_id", ctx.user.id),
   ]);
@@ -40,10 +40,10 @@ export default async function MembroInicio({
         </p>
       </div>
 
-      {/* Versículo do dia */}
+      {/* 1º — Palavra do dia */}
       {verse && (
         <Link
-          href={`/igreja/${slug}/membro/palavra`}
+          href={`/igreja/${slug}/membro/devocional`}
           className="card block p-5 transition-colors hover:border-border-strong"
         >
           <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -58,17 +58,22 @@ export default async function MembroInicio({
         </Link>
       )}
 
-      {/* Avisos — a desenvolver */}
-      <section>
-        <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
-          <Sym name="campaign" className="text-[20px]" /> Avisos
-        </h2>
-        <EmptyState icon="notifications">
-          Os avisos da igreja aparecerão aqui.
-        </EmptyState>
-      </section>
+      {/* 2º — Última mensagem */}
+      {video && (
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
+            <Sym name="play_circle" className="text-[20px]" /> Última mensagem
+          </h2>
+          {ctx.site.media?.lastLiveLabel && (
+            <p className="mb-2 text-sm font-medium">{ctx.site.media.lastLiveLabel}</p>
+          )}
+          <div className="aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] border border-border">
+            <iframe src={video} className="h-full w-full" allowFullScreen title="Mensagem" />
+          </div>
+        </section>
+      )}
 
-      {/* Próximos eventos — dados reais */}
+      {/* 3º — Próximos eventos */}
       <section>
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
@@ -101,22 +106,17 @@ export default async function MembroInicio({
         )}
       </section>
 
-      {/* Última mensagem — dados reais */}
-      {video && (
-        <section>
-          <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
-            <Sym name="play_circle" className="text-[20px]" /> Última mensagem
-          </h2>
-          {ctx.site.media?.lastLiveLabel && (
-            <p className="mb-2 text-sm font-medium">{ctx.site.media.lastLiveLabel}</p>
-          )}
-          <div className="aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] border border-border">
-            <iframe src={video} className="h-full w-full" allowFullScreen title="Mensagem" />
-          </div>
-        </section>
-      )}
+      {/* 4º — Avisos (a desenvolver) */}
+      <section>
+        <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
+          <Sym name="campaign" className="text-[20px]" /> Avisos
+        </h2>
+        <EmptyState icon="notifications">
+          Os avisos da igreja aparecerão aqui.
+        </EmptyState>
+      </section>
 
-      {/* Servir */}
+      {/* 5º — Onde você serve */}
       <section>
         <h2 className="mb-3 flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
           <Sym name="workspaces" className="text-[20px]" /> Onde você serve
@@ -135,24 +135,6 @@ export default async function MembroInicio({
           </div>
           <Sym name="chevron_right" className="text-muted-foreground" />
         </Link>
-      </section>
-
-      {/* A desenvolver */}
-      <section className="grid gap-3 sm:grid-cols-2">
-        {[
-          { icon: "checklist", label: "Minha escala", hint: "em breve" },
-          { icon: "auto_stories", label: "Devocional diário", hint: "em breve" },
-          { icon: "bookmark", label: "Conteúdos salvos", hint: "em breve" },
-          { icon: "groups", label: "Meu grupo / célula", hint: "em breve" },
-        ].map((c) => (
-          <div key={c.label} className="card flex items-center gap-3 p-4 opacity-60">
-            <Sym name={c.icon} className="text-[20px]" />
-            <div>
-              <p className="text-sm font-medium">{c.label}</p>
-              <p className="text-xs text-muted-foreground">{c.hint}</p>
-            </div>
-          </div>
-        ))}
       </section>
     </div>
   );

@@ -6,9 +6,9 @@ import { Sym } from "@/components/ui/primitives";
 
 const ITEMS = [
   { seg: "", label: "Início", icon: "home", exact: true },
-  { seg: "palavra", label: "Palavra", icon: "auto_stories" },
-  { seg: "agenda", label: "Agenda", icon: "calendar_month" },
-  { seg: "departamentos", label: "Servir", icon: "workspaces" },
+  { seg: "devocional", label: "Devocional", icon: "auto_stories" },
+  { seg: "ebd", label: "EBD", icon: "school" },
+  { seg: "contribuicao", label: "Contribuição", icon: "favorite" },
   { seg: "perfil", label: "Perfil", icon: "person" },
 ];
 

@@ -6,7 +6,7 @@ export const revalidate = 3600;
 
 export default async function MembroPalavra({
   params,
-}: PageProps<"/igreja/[slug]/membro/palavra">) {
+}: PageProps<"/igreja/[slug]/membro/devocional">) {
   const { slug } = await params;
   await getMemberContext(slug);
   const verse = await getDailyVerse();
