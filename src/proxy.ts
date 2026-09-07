@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { AUTH_COOKIE_MAX_AGE } from "@/lib/supabase/cookie-options";
 
 // Sessão + roteamento white-label por subdomínio.
 const RESERVED_SUBS = new Set(["www", "app", "api", "admin", "auth"]);
@@ -47,6 +48,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const supabase = createServerClient(url, anon, {
+      cookieOptions: { maxAge: AUTH_COOKIE_MAX_AGE },
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -57,7 +59,7 @@ export async function proxy(request: NextRequest) {
           );
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
+            response.cookies.set(name, value, { maxAge: AUTH_COOKIE_MAX_AGE, ...options }),
           );
         },
       },
