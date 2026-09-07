@@ -1,33 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Sym } from "@/components/ui/primitives";
-
-const MIME_BY_EXT: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  webp: "image/webp",
-  gif: "image/gif",
-  svg: "image/svg+xml",
-  bmp: "image/bmp",
-  avif: "image/avif",
-  heic: "image/heic",
-  heif: "image/heif",
-  tif: "image/tiff",
-  tiff: "image/tiff",
-  ico: "image/x-icon",
-};
+import { uploadSiteAsset } from "./actions";
 
 export function ImageUpload({
-  orgId,
+  slug,
   value,
   onChange,
   kind,
   aspect = "square",
 }: {
-  orgId: string;
+  slug: string;
   value?: string;
   onChange: (url: string) => void;
   kind: string;
@@ -45,34 +29,13 @@ export function ImageUpload({
     }
     setBusy(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        setErr("Sessão expirada. Recarregue a página e tente de novo.");
-        return;
-      }
-
-      const ext = (file.name.split(".").pop() || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-      const contentType =
-        file.type || MIME_BY_EXT[ext] || "application/octet-stream";
-      const safeExt = ext || (contentType.split("/")[1] ?? "bin");
-      const path = `${orgId}/${kind}-${Date.now()}.${safeExt}`;
-
-      const { error } = await supabase.storage
-        .from("site-assets")
-        .upload(path, file, { upsert: true, cacheControl: "3600", contentType });
-      if (error) {
-        console.error("upload error", error);
-        setErr(error.message || "Falha no envio.");
-        return;
-      }
-      const { data } = supabase.storage.from("site-assets").getPublicUrl(path);
-      onChange(data.publicUrl);
-    } catch (e) {
-      console.error(e);
-      setErr(e instanceof Error ? e.message : "Não foi possível enviar a imagem.");
+      const fd = new FormData();
+      fd.set("file", file);
+      const res = await uploadSiteAsset(slug, kind, fd);
+      if ("error" in res) setErr(res.error);
+      else onChange(res.url);
+    } catch {
+      setErr("Não foi possível enviar a imagem.");
     } finally {
       setBusy(false);
     }

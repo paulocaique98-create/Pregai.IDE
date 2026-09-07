@@ -34,11 +34,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export function SiteEditor({
   slug,
-  orgId,
   initial,
 }: {
   slug: string;
-  orgId: string;
   initial: SiteConfig;
 }) {
   const [cfg, setCfg] = useState<SiteConfig>(initial);
@@ -123,7 +121,7 @@ export function SiteEditor({
           <div>
             <span className="field-label">Logo</span>
             <ImageUpload
-              orgId={orgId}
+              slug={slug}
               kind="logo"
               value={cfg.branding.logoUrl}
               onChange={(url) => patch({ branding: { ...cfg.branding, logoUrl: url } })}
@@ -157,7 +155,7 @@ export function SiteEditor({
           <div>
             <span className="field-label">Imagem de capa</span>
             <ImageUpload
-              orgId={orgId}
+              slug={slug}
               kind="cover"
               aspect="wide"
               value={cfg.hero.coverImageUrl}
