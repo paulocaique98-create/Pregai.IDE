@@ -11,7 +11,7 @@ export default async function MembroInicio({
   const { slug } = await params;
   const ctx = await getMemberContext(slug);
 
-  const [{ data: events }, { data: myDepts }] = await Promise.all([
+  const [{ data: events }, { data: myDepts }, { data: notices }] = await Promise.all([
     ctx.supabase
       .from("site_events")
       .select("id, title, event_date, event_time, tag")
@@ -25,6 +25,14 @@ export default async function MembroInicio({
       .select("status")
       .eq("org_id", ctx.org.id)
       .eq("user_id", ctx.user.id),
+    ctx.supabase
+      .from("announcements")
+      .select("id, title, body, is_pinned, created_at")
+      .eq("org_id", ctx.org.id)
+      .eq("is_published", true)
+      .order("is_pinned", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(4),
   ]);
 
   const firstName = (ctx.profile?.full_name || "").split(" ")[0];
@@ -41,6 +49,33 @@ export default async function MembroInicio({
           Acompanhe a vida da igreja durante a semana.
         </p>
       </div>
+
+      {/* Avisos */}
+      {(notices ?? []).length > 0 && (
+        <section>
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-semibold">
+              <Sym name="campaign" className="text-[20px]" /> Avisos
+            </h2>
+            <Link href={`/igreja/${slug}/membro/avisos`} className="text-xs text-muted-foreground underline">
+              ver tudo
+            </Link>
+          </div>
+          <ul className="space-y-2">
+            {(notices ?? []).map((a) => (
+              <li key={a.id} className="card p-4">
+                <p className="flex items-center gap-1.5 text-sm font-semibold">
+                  {a.is_pinned && <Sym name="push_pin" className="text-[14px]" />}
+                  {a.title}
+                </p>
+                {a.body && (
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{a.body}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* 1º — Palavra do dia */}
       <Suspense fallback={<DailyVerseSkeleton />}>

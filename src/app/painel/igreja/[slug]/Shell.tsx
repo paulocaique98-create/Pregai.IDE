@@ -7,13 +7,15 @@ import { Sym } from "@/components/ui/primitives";
 
 const STAFF_NAV = [
   { seg: "", label: "Site", icon: "home", exact: true },
-  { seg: "departamentos", label: "Deptos", icon: "workspaces" },
+  { seg: "avisos", label: "Avisos", icon: "campaign" },
   { seg: "agenda", label: "Agenda", icon: "calendar_month" },
+  { seg: "departamentos", label: "Deptos", icon: "workspaces" },
   { seg: "oracoes", label: "Oração", icon: "volunteer_activism" },
   { seg: "membros", label: "Membros", icon: "group" },
 ];
 const STAFF_MORE = [
-  { seg: "ministerios", label: "Ministérios (site)", icon: "diversity_3" },
+  { seg: "ministerios", label: "Ministérios do site", icon: "diversity_3" },
+  { seg: "visitantes", label: "Visitantes", icon: "waving_hand" },
 ];
 const LEADER_NAV = [
   { seg: "departamentos", label: "Meus departamentos", icon: "workspaces" },
@@ -39,7 +41,7 @@ export function Shell({
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const base = `/painel/igreja/${slug}`;
-  const primary = isStaff ? STAFF_NAV : LEADER_NAV;
+  const primary = (isStaff ? STAFF_NAV : LEADER_NAV).slice(0, 5);
   const all = isStaff ? [...STAFF_NAV, ...STAFF_MORE] : LEADER_NAV;
 
   const href = (seg: string) => (seg ? `${base}/${seg}` : base);
