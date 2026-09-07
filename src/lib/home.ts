@@ -9,8 +9,7 @@ export async function resolveHome(): Promise<string> {
   const { data: auth } = await supabase.auth.getUser();
   const user = auth.user;
   if (!user) return "/entrar";
-
-  if (isPlatformAdmin(user.email)) return "/admin";
+  const platformAdmin = isPlatformAdmin(user.email);
 
   const [{ data: memberships }, { data: profile }] = await Promise.all([
     supabase
@@ -45,6 +44,10 @@ export async function resolveHome(): Promise<string> {
   if (primarySlug && primaryRow) return dest(primaryRow);
 
   const staff = rows.filter((r) => r.status === "active" && STAFF.includes(r.role) && r.organizations);
+
+  // Super-admin da plataforma: só cai em /admin se não estiver rodando uma única igreja.
+  if (platformAdmin && staff.length !== 1) return "/admin";
+
   if (staff.length === 1) return `/painel/igreja/${staff[0].organizations!.slug}`;
   if (staff.length > 1) return "/painel";
 
