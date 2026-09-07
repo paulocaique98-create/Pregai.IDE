@@ -83,7 +83,7 @@ export function StatTile({
   return (
     <div className="card min-w-0 p-3 sm:p-4">
       <div className="flex items-start justify-between gap-1.5">
-        <span className="min-w-0 text-[0.625rem] font-medium uppercase leading-tight tracking-wide text-muted-foreground sm:text-[0.6875rem]">
+        <span className="min-w-0 break-words text-[0.625rem] font-medium uppercase leading-tight tracking-tight text-muted-foreground sm:text-[0.6875rem] sm:tracking-wide">
           {label}
         </span>
         {icon && (

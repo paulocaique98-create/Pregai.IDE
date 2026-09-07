@@ -41,8 +41,8 @@ export default async function VisitantesPage({
 
       <div className="mb-8 grid grid-cols-3 gap-3">
         <StatTile label="Novos" value={count("novo")} icon="fiber_new" />
-        <StatTile label="Contatados" value={count("contatado")} icon="chat" />
-        <StatTile label="Compareceram" value={count("compareceu")} icon="task_alt" />
+        <StatTile label="Contatados" value={count("contatado")} />
+        <StatTile label="Vieram" value={count("compareceu")} icon="task_alt" />
       </div>
 
       {list.length === 0 ? (
