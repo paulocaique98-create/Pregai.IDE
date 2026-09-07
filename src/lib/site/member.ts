@@ -69,6 +69,14 @@ export const getMemberContext = cache(async (slug: string) => {
     if (intent === slug || !establishedElsewhere) {
       const { data: joined } = await supabase.rpc("join_organization", { p_slug: slug });
       status = (joined as string) ?? "pending";
+      if (status === "pending") {
+        const { orgStaffEmails, sendEmail, tmpl } = await import("@/lib/email");
+        const to = await orgStaffEmails(data.org.id);
+        if (to.length) {
+          const who = user.user_metadata?.full_name || user.email || "Alguém";
+          await sendEmail({ to, ...tmpl.newPendingMember(data.org.name, slug, who) });
+        }
+      }
     } else {
       return {
         supabase,

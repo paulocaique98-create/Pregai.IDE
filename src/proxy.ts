@@ -1,9 +1,31 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Refreshes the Supabase session on every request. Tenant subdomain routing
-// will be added here in Phase 1 (rewrite <slug>.<base-domain> -> /igreja/<slug>).
+// Sessão + roteamento white-label por subdomínio.
+const RESERVED_SUBS = new Set(["www", "app", "api", "admin", "auth"]);
+
 export async function proxy(request: NextRequest) {
+  // White-label: <slug>.<dominio-base> -> /igreja/<slug>
+  // Inerte enquanto NEXT_PUBLIC_TENANT_BASE_DOMAIN for o host da Vercel.
+  const host = (request.headers.get("host") ?? "").split(":")[0];
+  const base = process.env.NEXT_PUBLIC_TENANT_BASE_DOMAIN ?? "";
+  const path = request.nextUrl.pathname;
+  if (
+    base &&
+    host !== base &&
+    host.endsWith(`.${base}`) &&
+    !path.startsWith("/igreja/") &&
+    !path.startsWith("/_next") &&
+    !path.startsWith("/auth/")
+  ) {
+    const sub = host.slice(0, -(base.length + 1));
+    if (sub && !sub.includes(".") && !RESERVED_SUBS.has(sub)) {
+      const rewritten = request.nextUrl.clone();
+      rewritten.pathname = `/igreja/${sub}${path === "/" ? "" : path}`;
+      return NextResponse.rewrite(rewritten);
+    }
+  }
+
   // OAuth: se o Supabase devolver ?code= numa rota que não é o handler
   // (acontece quando o Site URL dele aponta para outro lugar), redireciona.
   const code = request.nextUrl.searchParams.get("code");

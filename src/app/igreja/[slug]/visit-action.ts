@@ -10,7 +10,7 @@ export async function submitVisit(
   const supabase = await createClient();
   const { data: org } = await supabase
     .from("organizations")
-    .select("id")
+    .select("id, name")
     .eq("slug", slug)
     .maybeSingle();
   if (!org) return { error: "Igreja não encontrada." };
@@ -27,5 +27,10 @@ export async function submitVisit(
     kids_ages: String(formData.get("kids_ages") ?? "").trim() || null,
   });
   if (error) return { error: "Não foi possível enviar. Tente novamente." };
+
+  const { orgStaffEmails, sendEmail, tmpl } = await import("@/lib/email");
+  const to = await orgStaffEmails(org.id);
+  if (to.length) await sendEmail({ to, ...tmpl.newVisitor(org.name, slug, name) });
+
   return { ok: true };
 }

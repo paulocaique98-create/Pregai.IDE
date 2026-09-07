@@ -62,11 +62,24 @@ export async function setMemberStatus(formData: FormData) {
   const ctx = await getOrgForMember(slug);
   if (!ctx || !["owner", "pastor", "secretaria"].includes(ctx.role)) return;
 
+  const { data: before } = await ctx.supabase
+    .from("organization_members")
+    .select("status")
+    .eq("org_id", ctx.org.id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
   await ctx.supabase
     .from("organization_members")
     .update({ status })
     .eq("org_id", ctx.org.id)
     .eq("user_id", userId);
+
+  if (status === "active" && before?.status !== "active") {
+    const { userEmail, sendEmail, tmpl } = await import("@/lib/email");
+    const to = await userEmail(userId);
+    if (to) await sendEmail({ to, ...tmpl.memberApproved(ctx.org.name, slug) });
+  }
 
   revalidatePath(`/painel/igreja/${slug}/membros`);
 }

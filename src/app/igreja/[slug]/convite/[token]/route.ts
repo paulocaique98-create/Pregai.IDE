@@ -26,6 +26,22 @@ export async function GET(
     return NextResponse.redirect(`${origin}/igreja/${slug}?convite=${result ?? "invalido"}`);
   }
 
+  if (result === "pending") {
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("id, name")
+      .eq("slug", targetSlug)
+      .maybeSingle();
+    if (org) {
+      const { orgStaffEmails, sendEmail, tmpl } = await import("@/lib/email");
+      const to = await orgStaffEmails(org.id);
+      if (to.length) {
+        const who = auth.user.user_metadata?.full_name || auth.user.email || "Alguém";
+        await sendEmail({ to, ...tmpl.newPendingMember(org.name, targetSlug, who) });
+      }
+    }
+  }
+
   const res = NextResponse.redirect(`${origin}/igreja/${targetSlug}/membro`);
   res.cookies.set(JOIN_INTENT_COOKIE, targetSlug, { path: "/", maxAge: 600 });
   return res;
