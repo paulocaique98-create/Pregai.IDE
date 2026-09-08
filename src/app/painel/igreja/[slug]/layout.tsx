@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getOrgForPanel, getSiteConfig } from "@/lib/site/queries";
 import { signOut } from "@/app/entrar/actions";
+import { canEditOrgSettings, type OrgRole } from "@/lib/org/settings";
 import { Shell } from "./Shell";
 
 export default async function IgrejaPainelLayout({
@@ -19,6 +20,7 @@ export default async function IgrejaPainelLayout({
       userEmail={ctx.user.email ?? ""}
       published={!!site?.is_published}
       isStaff={ctx.isStaff}
+      canConfig={canEditOrgSettings(ctx.role as OrgRole)}
       signOut={signOut}
     >
       {children}

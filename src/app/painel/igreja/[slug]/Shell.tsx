@@ -17,6 +17,7 @@ const STAFF_MORE = [
   { seg: "ministerios", label: "Ministérios do site", icon: "diversity_3" },
   { seg: "visitantes", label: "Visitantes", icon: "waving_hand" },
 ];
+const CONFIG_NAV = { seg: "configuracoes", label: "Configurações", icon: "settings" };
 const LEADER_NAV = [
   { seg: "departamentos", label: "Meus departamentos", short: "Deptos", icon: "workspaces" },
 ];
@@ -27,6 +28,7 @@ export function Shell({
   userEmail,
   published,
   isStaff,
+  canConfig,
   children,
   signOut,
 }: {
@@ -35,6 +37,7 @@ export function Shell({
   userEmail: string;
   published: boolean;
   isStaff: boolean;
+  canConfig?: boolean;
   children: React.ReactNode;
   signOut: () => void;
 }) {
@@ -42,7 +45,9 @@ export function Shell({
   const [open, setOpen] = useState(false);
   const base = `/painel/igreja/${slug}`;
   const primary = (isStaff ? STAFF_NAV : LEADER_NAV).slice(0, 5);
-  const all = isStaff ? [...STAFF_NAV, ...STAFF_MORE] : LEADER_NAV;
+  const all = isStaff
+    ? [...STAFF_NAV, ...STAFF_MORE, ...(canConfig ? [CONFIG_NAV] : [])]
+    : LEADER_NAV;
 
   const href = (seg: string) => (seg ? `${base}/${seg}` : base);
 

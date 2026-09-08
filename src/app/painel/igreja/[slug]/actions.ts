@@ -5,15 +5,29 @@ import { getOrgForMember } from "@/lib/site/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SiteConfig } from "@/lib/site/schema";
 
+const SITE_EDITORS = ["owner", "pastor", "secretaria"];
+
 export async function saveSite(slug: string, patch: Partial<SiteConfig>) {
   const ctx = await getOrgForMember(slug);
-  if (!ctx) return { error: "Sem permissão." };
+  if (!ctx || !SITE_EDITORS.includes(ctx.role)) return { error: "Sem permissão." };
+
+  // publicação passa pela RPC auditada
+  if ("is_published" in patch && Object.keys(patch).length === 1) {
+    const { error } = await ctx.supabase.rpc("set_site_published", {
+      p_org: ctx.org.id,
+      p_published: !!patch.is_published,
+    });
+    if (error) return { error: "Não foi possível alterar a publicação do site." };
+    revalidatePath(`/igreja/${slug}`);
+    revalidatePath(`/painel/igreja/${slug}`);
+    return { ok: true };
+  }
 
   const { error } = await ctx.supabase
     .from("site_configs")
     .update({ ...patch, updated_at: new Date().toISOString() })
     .eq("org_id", ctx.org.id);
-  if (error) return { error: error.message };
+  if (error) return { error: "Não foi possível salvar as alterações do site." };
 
   revalidatePath(`/igreja/${slug}`);
   revalidatePath(`/painel/igreja/${slug}`);
@@ -30,7 +44,7 @@ export async function uploadSiteAsset(
   formData: FormData,
 ): Promise<{ url: string } | { error: string }> {
   const ctx = await getOrgForMember(slug);
-  if (!ctx) return { error: "Sem permissão." };
+  if (!ctx || !SITE_EDITORS.includes(ctx.role)) return { error: "Sem permissão." };
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "Arquivo inválido." };
