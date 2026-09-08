@@ -21,6 +21,8 @@ export type Notice = {
   title: string;
   body?: string;
   url?: string;
+  entity_type?: string;
+  entity_id?: string;
 };
 
 /** Cria a notificação in-app e (se houver VAPID) envia push para os dispositivos do usuário. */
@@ -33,6 +35,8 @@ export async function notify(userId: string, n: Notice): Promise<void> {
     title: n.title,
     body: n.body ?? null,
     url: n.url ?? null,
+    entity_type: n.entity_type ?? null,
+    entity_id: n.entity_id ?? null,
   });
 
   if (!PRIV) return;

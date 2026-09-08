@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:security": "node scripts/phase1-security-check.mjs",
-    "test:security:2": "node scripts/phase2-config-check.mjs"
+    "test:security:2": "node scripts/phase2-config-check.mjs",
+    "test:security:avisos": "node scripts/phase2-avisos-check.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.6",
